@@ -1,0 +1,29 @@
+{
+  "name": "calendar.js",
+  "version": "0.0.1",
+  "description": "A calendar wich is able to display multiple column per day",
+  "main": "dist/calendar.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agence-webup/calendar.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/agence-webup/calendar/issues"
+  },
+  "homepage": "https://github.com/agence-webup/calendar#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.16.0",
+    "browser-sync": "^2.17.3",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-clean-css": "^2.0.13",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-uglify": "^2.0.0"
+  }
+}
