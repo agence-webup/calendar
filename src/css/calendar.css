@@ -1,14 +1,21 @@
-body {
-}
 
 .calendar {
   width: 100%;
   table-layout: fixed;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
+.calendar thead th {
+  padding: .5rem;
+}
+
+.calendar thead tr:first-child {
+  background-color: #fcfcfc;
 }
 
 .calendar th,
 .calendar td {
-  height: 2rem;
+  height: 1rem;
   border: 1px solid grey;
   text-align: center;
 }

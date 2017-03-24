@@ -1,7 +1,7 @@
-class UI {
+class UIManager {
 
     constructor(target, options, events, dateManager) {
-        this.target = document.querySelector(target);
+        this.target = target;
         this.options = options;
         this.events = events;
         this.dateManager = dateManager;
@@ -78,7 +78,6 @@ class UI {
 
     }
 
-    // TODO: place marker to use with matrix
     _buildDays() {
         let numberOfcol = this.options.columnsPerDay * this.options.numberOfDays + 1;
         let tbody = document.createElement('tbody');
@@ -94,6 +93,10 @@ class UI {
                 if(firstIteration) {
                     td.innerHTML = this.dateManager.getHoursLabel(index);
                     firstIteration = false;
+                } else {
+                    td.dataset.id = this.getCellId(index, j - 1);
+                    //td.innerHTML = this.getCellId(index, j - 1);
+                    //td.innerHTML = this.dateManager.hours[index];
                 }
 
                 line.appendChild(td);
@@ -105,6 +108,21 @@ class UI {
         return tbody;
     }
 
+
+    getCellId(index, column) {
+        let day = Math.ceil(column/ this.options.columnsPerDay);
+        console.log(this.dateManager.days[day - 1]);
+
+        let date = this.dateManager.days[day - 1];
+        date.setHours(this.dateManager.hours[index].getHours());
+        date.setMinutes(this.dateManager.hours[index].getMinutes());
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+
+        let col = column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
+        return date.getTime() + '#' + col;
+    }
+
 }
 
-module.exports = UI;
+module.exports = UIManager;

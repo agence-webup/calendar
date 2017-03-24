@@ -2,6 +2,12 @@ class DateManager {
 
     constructor(startDate) {
         this.startDate = startDate;
+
+        this.startDate.setHours(0);
+        this.startDate.setMinutes(0);
+        this.startDate.setSeconds(0);
+        this.startDate.setMilliseconds(0);
+
         this.days = [];
         this.hours = [];
     }
@@ -83,7 +89,9 @@ class DateManager {
             date.getDate() + days,
             date.getHours() + hours,
             date.getMinutes() + minutes,
-            date.getSeconds() + seconds);
+            date.getSeconds() + seconds,
+            0
+        );
 
         return returnDate;
     }
