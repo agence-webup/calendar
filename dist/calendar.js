@@ -5,8 +5,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var DateManager = require('./dateManager.js'),
-    UIManager = require('./ui.js'),
+var DateManager = require('./dateManager'),
+    UIManager = require('./ui'),
+    CellMatrix = require('./cellMatrix'),
     EventDispatcher = require('./eventDispatcher');
 
 var Calendar = function () {
@@ -34,7 +35,7 @@ var Calendar = function () {
             title: 'Event 1',
             date: new Date(2017, 2, 24, 10, 0, 0, 0),
             column: 2,
-            duration: 40
+            duration: 80
         }, {
             id: 2,
             title: 'Event 2',
@@ -43,8 +44,8 @@ var Calendar = function () {
             duration: 40
         }, {
             id: 3,
-            title: 'Event 2',
-            date: new Date(2017, 2, 25, 10, 0, 0, 0),
+            title: 'Event 3',
+            date: new Date(2017, 2, 25, 14, 0, 0, 0),
             column: 3,
             duration: 40
         }, {
@@ -52,22 +53,31 @@ var Calendar = function () {
             title: 'Event 4',
             date: new Date(2017, 2, 25, 10, 0, 0, 0),
             column: 1,
-            duration: 40
+            duration: 100
+        }, {
+            id: 5,
+            title: 'Event 5',
+            date: new Date(2017, 2, 25, 10, 0, 0, 0),
+            column: 3,
+            duration: 60
         }];
 
-        // handle date
+        // handle date (build days and hours arrays)
         var dateManager = new DateManager(this.options.currentDay);
         dateManager.generateDays(this.options.numberOfDays);
         dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
+        console.log(dateManager.days);
 
-        // build ui
+        // build ui and add ID to cell
         var uiManager = new UIManager(this.target, this.options, this.events, dateManager);
         uiManager.build();
 
-        // matrix
+        // cell matrix
+        var cellMatrix = new CellMatrix(dateManager.days, this.options.columnsPerDay, dateManager.hours, this.options.slotDuration);
+        cellMatrix.loadEvents(this.events);
 
         // event dispatcher
-        var eventDispatcher = new EventDispatcher(this.events);
+        var eventDispatcher = new EventDispatcher(this.events, this.options.slotDuration);
         eventDispatcher.updateEvents();
     }
 
@@ -84,7 +94,66 @@ var Calendar = function () {
 
 module.exports = Calendar;
 
-},{"./dateManager.js":2,"./eventDispatcher":3,"./ui.js":4}],2:[function(require,module,exports){
+},{"./cellMatrix":2,"./dateManager":3,"./eventDispatcher":4,"./ui":5}],2:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CellMatrix = function () {
+    function CellMatrix(days, nbColumns, hours, slotDuration) {
+        _classCallCheck(this, CellMatrix);
+
+        this.days = days;
+        this.nbColumns = nbColumns;
+        this.hours = hours;
+        this.slotDuration = slotDuration;
+        this.matrix = [];
+    }
+
+    _createClass(CellMatrix, [{
+        key: "loadEvents",
+        value: function loadEvents(events) {
+            this.events = events;
+            this.resetMatrix();
+            this.eventsToMatix();
+        }
+    }, {
+        key: "resetMatrix",
+        value: function resetMatrix() {
+            var _this = this;
+
+            var nbColumns = this.days.length * this.nbColumns;
+
+            var _loop = function _loop(i) {
+                _this.matrix[i] = [];
+                _this.hours.forEach(function (el, j) {
+                    _this.matrix[i][j + 1] = 0;
+                });
+            };
+
+            for (var i = 1; i <= nbColumns; i++) {
+                _loop(i);
+            }
+        }
+    }, {
+        key: "eventsToMatix",
+        value: function eventsToMatix() {
+            var _this2 = this;
+
+            this.events.forEach(function (el) {
+                var slotsToTake = Math.floor(el.duration / _this2.slotDuration);
+            });
+        }
+    }]);
+
+    return CellMatrix;
+}();
+
+module.exports = CellMatrix;
+
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -114,7 +183,7 @@ var DateManager = function () {
             this.days.push(currentDate);
 
             // then calculate other
-            for (var i = 0; i < number; i++) {
+            for (var i = 1; i < number; i++) {
                 currentDate = this.addToDate(currentDate, 1, 0, 0, 0);
                 this.days.push(currentDate);
             }
@@ -162,9 +231,6 @@ var DateManager = function () {
             }
         }
     }, {
-        key: '_addTime',
-        value: function _addTime(time, slotDuration) {}
-    }, {
         key: 'getDayLabel',
         value: function getDayLabel(index) {
             return this.days[index - 1].toLocaleDateString();
@@ -198,7 +264,7 @@ var DateManager = function () {
 
 module.exports = DateManager;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -206,22 +272,44 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var EventDispatcher = function () {
-    function EventDispatcher(events) {
+    function EventDispatcher(events, slotDuration) {
         _classCallCheck(this, EventDispatcher);
 
         this.events = events;
+        this.slotDuration = slotDuration;
     }
 
     _createClass(EventDispatcher, [{
         key: 'updateEvents',
         value: function updateEvents() {
-            console.log(this.events);
+            var _this = this;
 
-            this.events.forEach(function (elem) {
-                var id = elem.date.getTime() + '#' + elem.column;
+            //console.log(this.events);
+
+            this.events.forEach(function (event) {
+                var id = event.date.getTime() + '#' + event.column;
+
+                // TODO: use caching
                 var cell = document.querySelector('[data-id="' + id + '"]');
-                console.log(cell);
-                cell.innerHTML = elem.title;
+                // calulcate rowspan
+                var slotsToTake = Math.floor(event.duration / _this.slotDuration);
+                if (slotsToTake > 1) {
+                    // get coordinate
+                    var cellAdress = cell.dataset.coordinate.split('#');
+                    console.log(cellAdress);
+                    // iterate over next cell
+                    var currentRow = cellAdress[0];
+                    for (var i = 1; i < slotsToTake; i++) {
+                        currentRow++;
+
+                        // TODO: use caching
+                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                        currentCell.style['background-color'] = 'red';
+                        currentCell.style.display = 'none';
+                    }
+                }
+                cell.rowSpan = slotsToTake;
+                cell.innerHTML = event.title;
             });
         }
     }]);
@@ -231,7 +319,7 @@ var EventDispatcher = function () {
 
 module.exports = EventDispatcher;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -344,8 +432,11 @@ var UIManager = function () {
                         firstIteration = false;
                     } else {
                         td.dataset.id = _this.getCellId(index, j - 1);
+                        td.dataset.coordinate = _this.getCellCoordinate(index, j - 1);
+
                         //td.innerHTML = this.getCellId(index, j - 1);
                         //td.innerHTML = this.dateManager.hours[index];
+                        //td.innerHTML = this.getCellCoordinate(index, j - 1);
                     }
 
                     line.appendChild(td);
@@ -356,11 +447,18 @@ var UIManager = function () {
 
             return tbody;
         }
+
+        /**
+         * Get cell id (timestamp#col)
+         * @param  {[type]} index  [description]
+         * @param  {[type]} column [description]
+         * @return [type]          [description]
+         */
+
     }, {
         key: 'getCellId',
         value: function getCellId(index, column) {
             var day = Math.ceil(column / this.options.columnsPerDay);
-            console.log(this.dateManager.days[day - 1]);
 
             var date = this.dateManager.days[day - 1];
             date.setHours(this.dateManager.hours[index].getHours());
@@ -370,6 +468,19 @@ var UIManager = function () {
 
             var col = column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
             return date.getTime() + '#' + col;
+        }
+
+        /**
+         * Get cell coordinates (row#column)
+         * @param  {[type]} index  [description]
+         * @param  {[type]} column [description]
+         * @return [type]          [description]
+         */
+
+    }, {
+        key: 'getCellCoordinate',
+        value: function getCellCoordinate(index, column) {
+            return index + 1 + '#' + column;
         }
     }]);
 

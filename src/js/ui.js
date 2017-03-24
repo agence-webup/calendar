@@ -95,8 +95,12 @@ class UIManager {
                     firstIteration = false;
                 } else {
                     td.dataset.id = this.getCellId(index, j - 1);
+                    td.dataset.coordinate = this.getCellCoordinate(index, j - 1);
+
                     //td.innerHTML = this.getCellId(index, j - 1);
                     //td.innerHTML = this.dateManager.hours[index];
+                    //td.innerHTML = this.getCellCoordinate(index, j - 1);
+
                 }
 
                 line.appendChild(td);
@@ -109,9 +113,14 @@ class UIManager {
     }
 
 
+    /**
+     * Get cell id (timestamp#col)
+     * @param  {[type]} index  [description]
+     * @param  {[type]} column [description]
+     * @return [type]          [description]
+     */
     getCellId(index, column) {
         let day = Math.ceil(column/ this.options.columnsPerDay);
-        console.log(this.dateManager.days[day - 1]);
 
         let date = this.dateManager.days[day - 1];
         date.setHours(this.dateManager.hours[index].getHours());
@@ -121,6 +130,16 @@ class UIManager {
 
         let col = column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
         return date.getTime() + '#' + col;
+    }
+
+    /**
+     * Get cell coordinates (row#column)
+     * @param  {[type]} index  [description]
+     * @param  {[type]} column [description]
+     * @return [type]          [description]
+     */
+    getCellCoordinate(index, column) {
+        return (index + 1) + '#' + column;
     }
 
 }

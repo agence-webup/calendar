@@ -1,7 +1,8 @@
 "use strict";
 
-let DateManager = require('./dateManager.js'),
-UIManager = require('./ui.js'),
+let DateManager = require('./dateManager'),
+UIManager = require('./ui'),
+CellMatrix = require('./cellMatrix'),
 EventDispatcher = require('./eventDispatcher');
 
 class Calendar {
@@ -29,7 +30,7 @@ class Calendar {
                 title: 'Event 1',
                 date: new Date(2017, 2, 24, 10, 0, 0, 0),
                 column: 2,
-                duration: 40
+                duration: 80
             },
             {
                 id: 2,
@@ -40,8 +41,8 @@ class Calendar {
             },
             {
                 id: 3,
-                title: 'Event 2',
-                date: new Date(2017, 2, 25, 10, 0, 0, 0),
+                title: 'Event 3',
+                date: new Date(2017, 2, 25, 14, 0, 0, 0),
                 column: 3,
                 duration: 40
             },
@@ -50,23 +51,33 @@ class Calendar {
                 title: 'Event 4',
                 date: new Date(2017, 2, 25, 10, 0, 0, 0),
                 column: 1,
-                duration: 40
+                duration: 100
+            },
+            {
+                id: 5,
+                title: 'Event 5',
+                date: new Date(2017, 2, 25, 10, 0, 0, 0),
+                column: 3,
+                duration: 60
             },
         ];
 
-        // handle date
+        // handle date (build days and hours arrays)
         let dateManager = new DateManager(this.options.currentDay);
         dateManager.generateDays(this.options.numberOfDays);
         dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
+        console.log(dateManager.days);
 
-        // build ui
+        // build ui and add ID to cell
         let uiManager = new UIManager(this.target, this.options, this.events, dateManager);
         uiManager.build();
 
-        // matrix
+        // cell matrix
+        let cellMatrix = new CellMatrix(dateManager.days, this.options.columnsPerDay, dateManager.hours, this.options.slotDuration);
+        cellMatrix.loadEvents(this.events);
 
         // event dispatcher
-        let eventDispatcher = new EventDispatcher(this.events);
+        let eventDispatcher = new EventDispatcher(this.events, this.options.slotDuration);
         eventDispatcher.updateEvents();
     }
 

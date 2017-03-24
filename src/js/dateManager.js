@@ -18,7 +18,7 @@ class DateManager {
         this.days.push(currentDate);
 
         // then calculate other
-        for(let i = 0; i < number; i++) {
+        for(let i = 1; i < number; i++) {
             currentDate = this.addToDate(currentDate, 1, 0, 0, 0);
             this.days.push(currentDate);
         }
@@ -63,10 +63,6 @@ class DateManager {
             currentDateObject = this.addToDate(currentDateObject, 0, 0, slotDuration, 0);
             this.hours.push(currentDateObject);
         }
-    }
-
-    _addTime(time, slotDuration) {
-
     }
 
     getDayLabel(index) {
