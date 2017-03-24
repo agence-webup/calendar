@@ -4,8 +4,11 @@ import gulp from 'gulp';
 import autoprefixer from 'gulp-autoprefixer';
 import cleanCSS from 'gulp-clean-css';
 import uglify from 'gulp-uglify';
-import babel from 'gulp-babel';
 import ghPages from 'gulp-gh-pages';
+import util from 'gulp-util';
+import source from 'vinyl-source-stream';
+
+import browserify from 'browserify';
 
 const browserSync = require('browser-sync').create();
 
@@ -13,23 +16,30 @@ const browserSync = require('browser-sync').create();
 ---------------------------------------------------- */
 
 gulp.task('css', () => {
-    return gulp.src('src/*.css')
-        .pipe(autoprefixer({
-            browsers: ['> 1%', 'last 3 versions'],
-            cascade: false
-        }))
-        .pipe(cleanCSS())
-        .pipe(gulp.dest('dist'))
-        .pipe(browserSync.stream());
+    return gulp.src('src/css/*.css')
+    .pipe(autoprefixer({
+        browsers: ['> 1%', 'last 3 versions'],
+        cascade: false
+    }))
+    .pipe(cleanCSS())
+    .pipe(gulp.dest('dist'))
+    .pipe(browserSync.stream());
 });
 
 
 gulp.task('js', () => {
-    return gulp.src('src/*.js')
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(gulp.dest('dist'));
+    return browserify({
+            entries: ["./src/js/calendar.js"],
+            standalone: 'Calendar'
+        })
+        .transform('babelify', {
+            presets: ["es2015"],
+            global: true,
+            ignore: /node_modules/
+        })
+        .bundle()
+        .pipe(source("calendar.js"))
+        .pipe(gulp.dest("./dist"));
 });
 
 
@@ -44,8 +54,8 @@ gulp.task('deploy', function() {
 });
 
 gulp.task('watch', ['serve'], () => {
-    gulp.watch('src/*.css', ['css']);
-    gulp.watch('src/*.js', ['js-watch']);
+    gulp.watch('src/css/*.css', ['css']);
+    gulp.watch('src/js/*.js', ['js-watch']);
 });
 
 gulp.task('serve', function() {

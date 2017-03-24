@@ -1,0 +1,14 @@
+body {
+}
+
+.calendar {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.calendar th,
+.calendar td {
+  height: 2rem;
+  border: 1px solid grey;
+  text-align: center;
+}
