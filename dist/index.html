@@ -1,17 +1,105 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Calendar</title>
-        <link rel="stylesheet" href="calendar.css">
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="calendar.css">
+    <style>
+    body {
+        background-color: #3498db;
+        padding: 3rem;
+    }
+
+    .container {
+        background-color: #fff;
+        padding: 3rem;
+        border-radius: 8px;
+        border: 2px solid #ecf0f1;
+    }
+
+    .controls {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    button {
+        margin: 0;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 0;
+        background-color: #2ecc71;
+        box-shadow: none;
+        color: #fff;
+        text-align: center;
+        text-decoration: none !important;
+        line-height: normal;
+        cursor: pointer;
+        transition: background-color .4s;
+        font-size: inherit;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <button id="prev"><</button>
+            <button id="today">today</button>
+            <button id="next">></button>
+        </div>
+
         <div id="calendar">
 
         </div>
-        <script src="calendar.js"></script>
-        <script>
-            let calendar = new Calendar("#calendar");
-        </script>
-    </body>
+    </div>
+    <script src="calendar.js"></script>
+    <script>
+    function buildCalendar(currentDay) {
+        return new Calendar("#calendar", {
+            currentDay: currentDay,
+            numberOfDays: 3,
+            columnsPerDay: 4,
+            dayStartHour: '08:00',
+            dayEndHour: '18:00',
+            slotDuration: 20,
+            showBulkActions: true,
+            cssClass: 'calendar',
+            onEventClick: function(eventId) {
+                console.log('event clicked');
+            },
+        });
+    }
+
+    let currentDay = new Date();
+    let calendar = buildCalendar(currentDay);
+
+    function addDays(date, days) {
+        var returnDate = new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate() + days,
+            date.getHours(),
+            date.getMinutes(),
+            date.getSeconds(),
+            0
+        );
+
+        return returnDate;
+    }
+
+    document.querySelector("#prev").addEventListener('click', function() {
+        currentDay = addDays(currentDay, -1);
+        calendar = buildCalendar(currentDay);
+    });
+    document.querySelector("#today").addEventListener('click', function() {
+        currentDay = new Date();
+        calendar = buildCalendar(new Date());
+    });
+    document.querySelector("#next").addEventListener('click', function() {
+        currentDay = addDays(currentDay, 1);
+        calendar = buildCalendar(currentDay);
+    });
+
+
+    </script>
+</body>
 </html>

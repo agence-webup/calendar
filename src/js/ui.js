@@ -23,6 +23,10 @@ class UIManager {
         table.appendChild(header);
         table.appendChild(body);
 
+        //this.target.removeChild();
+        if(this.target.querySelector('table')) {
+            this.target.removeChild(this.target.querySelector('table'));
+        }
         this.target.appendChild(table);
     }
 

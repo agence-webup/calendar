@@ -10,19 +10,7 @@ class Calendar {
     constructor(target, options) {
         this.target = document.querySelector(target);
 
-        this.options = {
-            currentDay: new Date(),
-            numberOfDays: 2,
-            columnsPerDay: 3,
-            dayStartHour: '08:00',
-            dayEndHour: '18:00',
-            slotDuration: 20,
-            showBulkActions: true,
-            cssClass: 'calendar',
-            onEventClick: function(eventId) {
-                console.log('event clicked');
-            },
-        }
+        this.options = options;
 
         this.events = [
             {

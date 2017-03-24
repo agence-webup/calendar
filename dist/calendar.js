@@ -16,19 +16,7 @@ var Calendar = function () {
 
         this.target = document.querySelector(target);
 
-        this.options = {
-            currentDay: new Date(),
-            numberOfDays: 2,
-            columnsPerDay: 3,
-            dayStartHour: '08:00',
-            dayEndHour: '18:00',
-            slotDuration: 20,
-            showBulkActions: true,
-            cssClass: 'calendar',
-            onEventClick: function onEventClick(eventId) {
-                console.log('event clicked');
-            }
-        };
+        this.options = options;
 
         this.events = [{
             id: 1,
@@ -354,6 +342,10 @@ var UIManager = function () {
             table.appendChild(header);
             table.appendChild(body);
 
+            //this.target.removeChild();
+            if (this.target.querySelector('table')) {
+                this.target.removeChild(this.target.querySelector('table'));
+            }
             this.target.appendChild(table);
         }
     }, {
