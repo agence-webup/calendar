@@ -15,17 +15,21 @@ class EventDispatcher {
 
             // TODO: use caching
             let cell = document.querySelector('[data-id="' + id + '"]');
+
+            if(!cell) {
+                return;
+            }
+
             // calulcate rowspan
             let slotsToTake = Math.floor(event.duration / this.slotDuration);
             if(slotsToTake > 1) {
                 // get coordinate
                 let cellAdress = cell.dataset.coordinate.split('#');
-                console.log(cellAdress);
                 // iterate over next cell
                 let currentRow = cellAdress[0];
                 for(let i = 1; i < slotsToTake; i++) {
                     currentRow++;
-                    
+
                     // TODO: use caching
                     let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                     currentCell.style['background-color'] = 'red';

@@ -8,7 +8,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var DateManager = require('./dateManager'),
     UIManager = require('./ui'),
     CellMatrix = require('./cellMatrix'),
-    EventDispatcher = require('./eventDispatcher');
+    EventDispatcher = require('./eventDispatcher'),
+    LockedEventDispatcher = require('./lockedEventDispatcher');
 
 var Calendar = function () {
     function Calendar(target, options) {
@@ -21,40 +22,51 @@ var Calendar = function () {
         this.events = [{
             id: 1,
             title: 'Event 1',
-            date: new Date(2017, 2, 24, 10, 0, 0, 0),
+            date: new Date(2017, 2, 28, 10, 0, 0, 0),
             column: 2,
             duration: 80
         }, {
             id: 2,
             title: 'Event 2',
-            date: new Date(2017, 2, 24, 9, 0, 0, 0),
+            date: new Date(2017, 2, 27, 9, 0, 0, 0),
             column: 1,
             duration: 40
         }, {
             id: 3,
             title: 'Event 3',
-            date: new Date(2017, 2, 25, 14, 0, 0, 0),
+            date: new Date(2017, 2, 28, 14, 0, 0, 0),
             column: 3,
             duration: 40
         }, {
             id: 4,
             title: 'Event 4',
-            date: new Date(2017, 2, 25, 10, 0, 0, 0),
-            column: 1,
+            date: new Date(2017, 2, 27, 10, 0, 0, 0),
+            column: 2,
             duration: 100
         }, {
             id: 5,
             title: 'Event 5',
-            date: new Date(2017, 2, 25, 10, 0, 0, 0),
+            date: new Date(2017, 3, 28, 8, 0, 0, 0),
             column: 3,
             duration: 60
+        }];
+
+        this.blockedEvent = [{
+            start: new Date(2017, 3, 19, 12, 0, 0, 0),
+            end: new Date(2017, 3, 19, 14, 0, 0, 0),
+            column: 2,
+            color: 'red'
+        }, {
+            start: new Date(2017, 3, 18, 12, 0, 0, 0),
+            end: new Date(2017, 3, 18, 18, 0, 0, 0),
+            column: 2,
+            color: 'red'
         }];
 
         // handle date (build days and hours arrays)
         var dateManager = new DateManager(this.options.currentDay);
         dateManager.generateDays(this.options.numberOfDays);
         dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
-        console.log(dateManager.days);
 
         // build ui and add ID to cell
         var uiManager = new UIManager(this.target, this.options, this.events, dateManager);
@@ -67,6 +79,10 @@ var Calendar = function () {
         // event dispatcher
         var eventDispatcher = new EventDispatcher(this.events, this.options.slotDuration);
         eventDispatcher.updateEvents();
+
+        // lockedEvent dispatcher
+        var lockedEventDispatcher = new LockedEventDispatcher(this.blockedEvent, this.options.slotDuration);
+        lockedEventDispatcher.updateEvents();
     }
 
     _createClass(Calendar, [{
@@ -82,7 +98,7 @@ var Calendar = function () {
 
 module.exports = Calendar;
 
-},{"./cellMatrix":2,"./dateManager":3,"./eventDispatcher":4,"./ui":5}],2:[function(require,module,exports){
+},{"./cellMatrix":2,"./dateManager":3,"./eventDispatcher":4,"./lockedEventDispatcher":5,"./ui":6}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -279,12 +295,16 @@ var EventDispatcher = function () {
 
                 // TODO: use caching
                 var cell = document.querySelector('[data-id="' + id + '"]');
+
+                if (!cell) {
+                    return;
+                }
+
                 // calulcate rowspan
                 var slotsToTake = Math.floor(event.duration / _this.slotDuration);
                 if (slotsToTake > 1) {
                     // get coordinate
                     var cellAdress = cell.dataset.coordinate.split('#');
-                    console.log(cellAdress);
                     // iterate over next cell
                     var currentRow = cellAdress[0];
                     for (var i = 1; i < slotsToTake; i++) {
@@ -308,6 +328,63 @@ var EventDispatcher = function () {
 module.exports = EventDispatcher;
 
 },{}],5:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var LockedEventDispatcher = function () {
+    function LockedEventDispatcher(lockedEvents, slotDuration) {
+        _classCallCheck(this, LockedEventDispatcher);
+
+        this.lockedEvents = lockedEvents;
+        this.slotDuration = slotDuration;
+    }
+
+    _createClass(LockedEventDispatcher, [{
+        key: 'updateEvents',
+        value: function updateEvents() {
+            var _this = this;
+
+            this.lockedEvents.forEach(function (lockedEvent) {
+                console.log(lockedEvent.start);
+                console.log(lockedEvent.start.getTime());
+
+                var id = lockedEvent.start.getTime() + '#' + lockedEvent.column;
+
+                // TODO: use caching
+                var cell = document.querySelector('[data-id="' + id + '"]');
+
+                if (!cell) {
+                    return;
+                }
+
+                var duration = (lockedEvent.end.getTime() - lockedEvent.start.getTime()) / 60 / 1000;
+                var slotsToTake = Math.floor(duration / _this.slotDuration);
+
+                if (slotsToTake > 1) {
+                    // get coordinate
+                    var cellAdress = cell.dataset.coordinate.split('#');
+                    // iterate over next cell
+                    var currentRow = cellAdress[0];
+                    for (var i = 0; i < slotsToTake; i++) {
+                        // TODO: use caching
+                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                        currentCell.style.backgroundColor = 'grey';
+                        currentRow++;
+                    }
+                }
+            });
+        }
+    }]);
+
+    return LockedEventDispatcher;
+}();
+
+module.exports = LockedEventDispatcher;
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -346,6 +423,7 @@ var UIManager = function () {
             if (this.target.querySelector('table')) {
                 this.target.removeChild(this.target.querySelector('table'));
             }
+
             this.target.appendChild(table);
         }
     }, {

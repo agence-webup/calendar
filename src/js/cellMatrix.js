@@ -30,8 +30,6 @@ class CellMatrix {
     eventsToMatix() {
         this.events.forEach((el) => {
             let slotsToTake = Math.floor(el.duration / this.slotDuration);
-
-
         });
 
     }

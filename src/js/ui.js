@@ -27,6 +27,7 @@ class UIManager {
         if(this.target.querySelector('table')) {
             this.target.removeChild(this.target.querySelector('table'));
         }
+
         this.target.appendChild(table);
     }
 
