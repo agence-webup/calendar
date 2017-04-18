@@ -46,8 +46,8 @@ var Calendar = function () {
         }, {
             id: 5,
             title: 'Event 5',
-            date: new Date(2017, 3, 28, 8, 0, 0, 0),
-            column: 3,
+            date: new Date(2017, 3, 19, 10, 0, 0, 0),
+            column: 2,
             duration: 60
         }];
 
@@ -91,6 +91,59 @@ var Calendar = function () {
     }, {
         key: 'stopEditMode',
         value: function stopEditMode() {}
+    }, {
+        key: 'addEventMode',
+        value: function addEventMode(duration, callback) {
+            var dropAllowed = true;
+            var slotsToTake = Math.floor(duration / this.options.slotDuration);
+
+            if (!slotsToTake >= 1) {
+                return;
+            }
+
+            [].forEach.call(document.querySelectorAll('[data-id]'), function (el) {
+
+                el.addEventListener('click', function (event) {
+                    var id = event.target.dataset.id.split('#');
+                    if (!dropAllowed) {
+                        alert('Cet emplacement est déjà prit');
+                        event.stopPropagation();
+                    } else {
+                        callback(id[0], id[1]);
+                        event.stopPropagation();
+                    }
+                });
+
+                el.addEventListener('mouseover', function (event) {
+
+                    [].forEach.call(document.querySelectorAll('[data-id]'), function (cell) {
+                        cell.classList.remove('calendar-selection--allowed');
+                        cell.classList.remove('calendar-selection--forbidden');
+                    });
+
+                    var cellAdress = event.target.dataset.coordinate.split('#');
+                    var currentRow = cellAdress[0];
+                    var cells = [];
+
+                    var cssClass = 'calendar-selection--allowed';
+                    for (var i = 0; i < slotsToTake; i++) {
+                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                        cells.push(currentCell);
+                        if (currentCell.dataset.locked !== undefined) {
+                            cssClass = 'calendar-selection--forbidden';
+                            dropAllowed = false;
+                        } else {
+                            dropAllowed = true;
+                        }
+                        currentRow++;
+                    }
+
+                    cells.forEach(function (cell) {
+                        cell.classList.add(cssClass);
+                    });
+                });
+            });
+        }
     }]);
 
     return Calendar;
@@ -348,8 +401,6 @@ var LockedEventDispatcher = function () {
             var _this = this;
 
             this.lockedEvents.forEach(function (lockedEvent) {
-                console.log(lockedEvent.start);
-                console.log(lockedEvent.start.getTime());
 
                 var id = lockedEvent.start.getTime() + '#' + lockedEvent.column;
 
@@ -371,7 +422,8 @@ var LockedEventDispatcher = function () {
                     for (var i = 0; i < slotsToTake; i++) {
                         // TODO: use caching
                         var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                        currentCell.style.backgroundColor = 'grey';
+                        currentCell.classList.add('calendar-locked');
+                        currentCell.dataset.locked = '';
                         currentRow++;
                     }
                 }

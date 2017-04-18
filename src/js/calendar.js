@@ -45,8 +45,8 @@ class Calendar {
             {
                 id: 5,
                 title: 'Event 5',
-                date: new Date(2017, 3, 28, 8, 0, 0, 0),
-                column: 3,
+                date: new Date(2017, 3, 19, 10, 0, 0, 0),
+                column: 2,
                 duration: 60
             },
         ];
@@ -98,6 +98,57 @@ class Calendar {
 
     }
 
+    addEventMode(duration, callback) {
+        let dropAllowed = true;
+        let slotsToTake = Math.floor(duration / this.options.slotDuration);
+
+        if(!slotsToTake >= 1) {
+            return;
+        }
+
+        [].forEach.call(document.querySelectorAll('[data-id]'), function(el) {
+
+            el.addEventListener('click', (event) => {
+                let id = event.target.dataset.id.split('#');
+                if(!dropAllowed) {
+                    alert('Cet emplacement est déjà prit');
+                    event.stopPropagation();
+                } else {
+                    callback(id[0], id[1]);
+                    event.stopPropagation();
+                }
+            });
+
+            el.addEventListener('mouseover', (event) => {
+
+                [].forEach.call(document.querySelectorAll('[data-id]'), function(cell) {
+                    cell.classList.remove('calendar-selection--allowed');
+                    cell.classList.remove('calendar-selection--forbidden');
+                });
+
+                let cellAdress = event.target.dataset.coordinate.split('#');
+                let currentRow = cellAdress[0];
+                let cells = [];
+
+                let cssClass = 'calendar-selection--allowed';
+                for(let i = 0; i < slotsToTake; i++) {
+                    let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                    cells.push(currentCell);
+                    if(currentCell.dataset.locked !== undefined) {
+                        cssClass = 'calendar-selection--forbidden';
+                        dropAllowed = false;
+                    } else {
+                        dropAllowed = true;
+                    }
+                    currentRow++;
+                }
+
+                cells.forEach((cell) => {
+                    cell.classList.add(cssClass);
+                })
+            })
+        })
+    }
 
 
 }

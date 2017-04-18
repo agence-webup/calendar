@@ -9,8 +9,6 @@ class LockedEventDispatcher {
 
     updateEvents() {
         this.lockedEvents.forEach((lockedEvent) => {
-            console.log(lockedEvent.start);
-            console.log(lockedEvent.start.getTime());
 
             let id = lockedEvent.start.getTime() + '#' + lockedEvent.column;
 
@@ -33,7 +31,8 @@ class LockedEventDispatcher {
                 for(let i = 0; i < slotsToTake; i++) {
                     // TODO: use caching
                     let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                    currentCell.style.backgroundColor = 'grey';
+                    currentCell.classList.add('calendar-locked');
+                    currentCell.dataset.locked = '';
                     currentRow++;
 
                 }
