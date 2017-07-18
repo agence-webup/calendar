@@ -5,6 +5,14 @@ class UIManager {
         this.options = options;
         this.events = events;
         this.dateManager = dateManager;
+
+        this.ui = {
+            footer: this._buildFooter()
+        }
+
+        this.listener = {
+            footerBtn: null
+        }
     }
 
     build() {
@@ -12,13 +20,13 @@ class UIManager {
         let dayLabels = this._buildDayLabel();
         let header = this._buildHeader();
         let body = this._buildDays();
+        let footer = this._buildFooter();
 
         header.appendChild(dayLabels);
 
-        if(this.options.showBulkActions) {
-            let bulkActions = this._buildBulkActions();
-            header.appendChild(bulkActions);
-        }
+        let bulkActions = this._buildBulkActions();
+        header.appendChild(bulkActions);
+
 
         table.appendChild(header);
         table.appendChild(body);
@@ -28,7 +36,29 @@ class UIManager {
             this.target.removeChild(this.target.querySelector('table'));
         }
 
+        this.target.innerHTML = '';
         this.target.appendChild(table);
+
+        // append footer
+        document.body.append(this.ui.footer.wrapper);
+    }
+
+
+
+    showFooter(text, callback) {
+        this.ui.footer.message.innerHTML = text;
+        setTimeout(() => {
+            this.ui.footer.wrapper.classList.add('calendar-mode--active');
+        }, 10);
+
+        this.ui.footer.btn.addEventListener('click', (event) => {
+            callback();
+            this.hideFooter();
+        });
+    }
+
+    hideFooter() {
+        this.ui.footer.wrapper.classList.remove('calendar-mode--active');
     }
 
     _buildTable() {
@@ -72,8 +102,10 @@ class UIManager {
             if(firstIteration) {
                 firstIteration = false;
                 th.innerHTML = '';
+                th.classList.add('calendar-bulk');
             } else {
                 th.innerHTML = 'bloquer';
+                th.classList.add('calendar-bulk');
             }
 
             bulkActionsLine.appendChild(th);
@@ -117,13 +149,34 @@ class UIManager {
         return tbody;
     }
 
+    _buildFooter(text) {
+        let footer = document.createElement('div');
+        footer.classList.add('calendar-mode');
+        footer.innerHTML = '';
+
+        let message = document.createElement('span');
+        message.innerHTML = '';
+
+        let footerBtn = document.createElement('button');
+        footerBtn.innerText = 'Annuler';
+
+        footer.appendChild(message);
+        footer.appendChild(footerBtn);
+
+        return {
+            message: message,
+            wrapper: footer,
+            btn: footerBtn
+        }
+    }
+
 
     /**
-     * Get cell id (timestamp#col)
-     * @param  {[type]} index  [description]
-     * @param  {[type]} column [description]
-     * @return [type]          [description]
-     */
+    * Get cell id (timestamp#col)
+    * @param  {[type]} index  [description]
+    * @param  {[type]} column [description]
+    * @return [type]          [description]
+    */
     getCellId(index, column) {
         let day = Math.ceil(column/ this.options.columnsPerDay);
 
@@ -138,11 +191,11 @@ class UIManager {
     }
 
     /**
-     * Get cell coordinates (row#column)
-     * @param  {[type]} index  [description]
-     * @param  {[type]} column [description]
-     * @return [type]          [description]
-     */
+    * Get cell coordinates (row#column)
+    * @param  {[type]} index  [description]
+    * @param  {[type]} column [description]
+    * @return [type]          [description]
+    */
     getCellCoordinate(index, column) {
         return (index + 1) + '#' + column;
     }

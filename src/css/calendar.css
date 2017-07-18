@@ -19,13 +19,45 @@
 .calendar th,
 .calendar td {
   height: 1rem;
-  border: 1px solid grey;
+  border: 1px solid #37474f;
   text-align: center;
 }
 
+.calendar td {
+  cursor: pointer;
+}
+
+.calendar th::selection,
+.calendar td::selection {
+  background: transparent;
+}
+
+/* bulk
+-------------------------------------------------------------- */
+
+.calendar-bulk {
+  display: none;
+}
+
+[data-mode="locked"] .calendar-bulk {
+  display: table-cell;
+}
+
+/* event
+-------------------------------------------------------------- */
+
+.calendar-event {
+    background-color: #28a69b;
+    color: #fff;
+    cursor: pointer;
+}
 
 .calendar-locked {
-  background-color: #adb6b5;
+  background-color: #b0bec5;
+}
+
+.calendar-lockedTemp {
+  background-color: #b0bec5;
 }
 
 .calendar-selection--allowed {
@@ -51,8 +83,12 @@
   background-color: #eef2c0;
   text-align: center;
   font-size: 1.2rem;
+  transition: transform .5s ease;
+  transform: translateY(100%);
+}
 
-  //transform: translateY(100%);
+.calendar-mode--active {
+  transform: translate(0);
 }
 
 .calendar-mode button {

@@ -38,6 +38,10 @@ gulp.task('js', () => {
             ignore: /node_modules/
         })
         .bundle()
+        .on('error', function(err) {
+            console.log(err);
+            this.emit('end');
+        })
         .pipe(source("calendar.js"))
         .pipe(gulp.dest("./dist"));
 });

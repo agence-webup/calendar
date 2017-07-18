@@ -18,7 +18,7 @@
 
     .controls {
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 1rem;
     }
 
     button {
@@ -36,76 +36,129 @@
         transition: background-color .4s;
         font-size: inherit;
     }
+
+    .test {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .test button {
+        background-color: #9ccc65;
+    }
+
     </style>
 </head>
 <body>
-    <div class="calendar-mode">
-        Choisissez une plage horaire libre
-        <button>Annuler</button>
-    </div>
     <div class="container">
         <div class="controls">
             <button id="prev"><</button>
             <button id="today">today</button>
             <button id="next">></button>
         </div>
-
-        <div id="calendar">
-
+        <div class="test">
+            <p>Test actions</p>
+            <button id="add">Add task</button>
+            <button id="edit">Edit task 1</button>
+            <button id="block">Blocked mode</button>
         </div>
+        <div id="calendar"></div>
     </div>
     <script src="calendar.js"></script>
     <script>
-    function buildCalendar(currentDay) {
-        return new Calendar("#calendar", {
-            currentDay: currentDay,
-            numberOfDays: 2,
-            columnsPerDay: 3,
-            dayStartHour: '08:00',
-            dayEndHour: '18:00',
-            slotDuration: 20,
-            showBulkActions: true,
-            cssClass: 'calendar',
-            onEventClick: function(eventId) {
-                console.log('event clicked');
-            },
+
+    var events = [
+        {
+            id: 1,
+            title: 'Event 1',
+            date: new Date(2017, 6, 18, 10, 0, 0, 0),
+            column: 2,
+            duration: 80
+        },
+        {
+            id: 2,
+            title: 'Event 2',
+            date: new Date(2017, 6, 18, 9, 0, 0, 0),
+            column: 1,
+            duration: 40
+        },
+        {
+            id: 3,
+            title: 'Event 3',
+            date: new Date(2017, 6, 18, 14, 0, 0, 0),
+            column: 3,
+            duration: 40
+        },
+        {
+            id: 3,
+            title: 'Event 4',
+            date: new Date(2017, 6, 20, 14, 0, 0, 0),
+            column: 3,
+            duration: 120
+        }
+    ];
+
+    var blockedEvents = [
+        {
+            start: new Date(2017, 6, 19, 12, 0, 0, 0),
+            end: new Date(2017, 6, 19, 14, 0, 0, 0),
+            column: 1,
+        },
+        {
+            start: new Date(2017, 6, 19, 8, 0, 0, 0),
+            end: new Date(2017, 6, 19, 14, 0, 0, 0),
+            column: 3,
+        }
+    ];
+
+    let calendar = new Calendar("#calendar", {
+        currentDay: new Date(),
+        numberOfDays: 3,
+        columnsPerDay: 3,
+        dayStartHour: '08:00',
+        dayEndHour: '18:00',
+        slotDuration: 20,
+        cssClass: 'calendar',
+        ui: {
+            next: document.querySelector('#next'),
+            prev: document.querySelector('#prev'),
+            today: document.querySelector('#today'),
+        },
+        onEventClick: function(eventId) {
+            alert('Event clicked: ' + eventId);
+        },
+        onLocked: function(start, end, callback) {
+            alert(start + end);
+            setTimeout(() => {
+                callback(null, {
+                    start: new Date(2017, 6, 11, 12, 0, 0, 0),
+                    end: new Date(2017, 6, 11, 14, 0, 0, 0),
+                    column: 1,
+                });
+            }, 1000);
+        },
+        onPeriodChange: function(start, end) {
+            console.log(this);
+            console.log(start + ' ->', end);
+            this.loadEvents(events, blockedEvents);
+        }
+    });
+
+    calendar.loadEvents(events, blockedEvents);
+
+    document.querySelector('#add').addEventListener('click', () => {
+        calendar.startAddEventMode(60, (timestamp, column) => {
+            alert('Drop on column ' + column + ' at ' + timestamp);
         });
-    }
-
-
-
-    let currentDay = new Date();
-    let calendar = buildCalendar(currentDay);
-    calendar.addEventMode(100, (timestamp, column) => {
-        alert('Drop on column ' + column + ' at ' + timestamp);
     });
 
-
-    function addDays(date, days) {
-        var returnDate = new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate() + days,
-            date.getHours(),
-            date.getMinutes(),
-            date.getSeconds(),
-            0
-        );
-
-        return returnDate;
-    }
-
-    document.querySelector("#prev").addEventListener('click', function() {
-        currentDay = addDays(currentDay, -1);
-        calendar = buildCalendar(currentDay);
+    document.querySelector('#edit').addEventListener('click', () => {
+        calendar.startEditMode(1, (timestamp, column) => {
+            alert('Drop on column ' + column + ' at ' + timestamp);
+        });
     });
-    document.querySelector("#today").addEventListener('click', function() {
-        currentDay = new Date();
-        calendar = buildCalendar(new Date());
-    });
-    document.querySelector("#next").addEventListener('click', function() {
-        currentDay = addDays(currentDay, 1);
-        calendar = buildCalendar(currentDay);
+
+    document.querySelector('#block').addEventListener('click', () => {
+        calendar.startLockedMode();
     });
 
 

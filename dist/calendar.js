@@ -5,142 +5,323 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var DateManager = require('./dateManager'),
-    UIManager = require('./ui'),
-    CellMatrix = require('./cellMatrix'),
-    EventDispatcher = require('./eventDispatcher'),
-    LockedEventDispatcher = require('./lockedEventDispatcher');
+var DateManager = require('./dateManager');
+var UIManager = require('./uiManager');
+var EventsManager = require('./eventsManager');
+var CellMatrix = require('./cellMatrix');
+var EventDispatcher = require('./eventDispatcher');
+var LockedEventDispatcher = require('./lockedEventDispatcher');
+
+var ADD_MODE = 'add';
+var EDIT_MODE = 'edit';
+var WRITE_MODE = 'write';
+var VIEW_MODE = 'view';
+var LOCKED_MODE = 'locked';
 
 var Calendar = function () {
     function Calendar(target, options) {
         _classCallCheck(this, Calendar);
 
         this.target = document.querySelector(target);
-
         this.options = options;
 
-        this.events = [{
-            id: 1,
-            title: 'Event 1',
-            date: new Date(2017, 2, 28, 10, 0, 0, 0),
-            column: 2,
-            duration: 80
-        }, {
-            id: 2,
-            title: 'Event 2',
-            date: new Date(2017, 2, 27, 9, 0, 0, 0),
-            column: 1,
-            duration: 40
-        }, {
-            id: 3,
-            title: 'Event 3',
-            date: new Date(2017, 2, 28, 14, 0, 0, 0),
-            column: 3,
-            duration: 40
-        }, {
-            id: 4,
-            title: 'Event 4',
-            date: new Date(2017, 2, 27, 10, 0, 0, 0),
-            column: 2,
-            duration: 100
-        }, {
-            id: 5,
-            title: 'Event 5',
-            date: new Date(2017, 3, 19, 10, 0, 0, 0),
-            column: 2,
-            duration: 60
-        }];
+        this.mode = {
+            current: VIEW_MODE,
+            ADD_MODE: {
+                slotsToTake: null,
+                dropAllowed: null
+            },
+            LOCKED_MODE: {
+                mousedown: false,
+                start: null,
+                end: null,
+                stack: []
+            }
+        };
 
-        this.blockedEvent = [{
-            start: new Date(2017, 3, 19, 12, 0, 0, 0),
-            end: new Date(2017, 3, 19, 14, 0, 0, 0),
-            column: 2,
-            color: 'red'
-        }, {
-            start: new Date(2017, 3, 18, 12, 0, 0, 0),
-            end: new Date(2017, 3, 18, 18, 0, 0, 0),
-            column: 2,
-            color: 'red'
-        }];
-
-        // handle date (build days and hours arrays)
-        var dateManager = new DateManager(this.options.currentDay);
-        dateManager.generateDays(this.options.numberOfDays);
-        dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
-
-        // build ui and add ID to cell
-        var uiManager = new UIManager(this.target, this.options, this.events, dateManager);
-        uiManager.build();
-
-        // cell matrix
-        var cellMatrix = new CellMatrix(dateManager.days, this.options.columnsPerDay, dateManager.hours, this.options.slotDuration);
-        cellMatrix.loadEvents(this.events);
-
-        // event dispatcher
-        var eventDispatcher = new EventDispatcher(this.events, this.options.slotDuration);
-        eventDispatcher.updateEvents();
-
-        // lockedEvent dispatcher
-        var lockedEventDispatcher = new LockedEventDispatcher(this.blockedEvent, this.options.slotDuration);
-        lockedEventDispatcher.updateEvents();
+        this.init();
+        this.build();
     }
 
     _createClass(Calendar, [{
-        key: 'startEditMode',
-        value: function startEditMode(taskId) {}
+        key: 'init',
+        value: function init() {
+            // bind callendar controls
+            this._bindControlls();
+        }
     }, {
-        key: 'stopEditMode',
-        value: function stopEditMode() {}
+        key: 'build',
+        value: function build() {
+            // handle date (build days and hours arrays)
+            var dateManager = new DateManager(this.options.currentDay);
+            dateManager.generateDays(this.options.numberOfDays);
+            dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
+
+            // build ui and add ID to cell
+            this.uiManager = new UIManager(this.target, this.options, this.events, dateManager);
+            this.uiManager.build();
+        }
     }, {
-        key: 'addEventMode',
-        value: function addEventMode(duration, callback) {
-            var dropAllowed = true;
-            var slotsToTake = Math.floor(duration / this.options.slotDuration);
+        key: 'loadEvents',
+        value: function loadEvents(events, blockedEvents) {
+            this.events = events;
+            this.blockedEvents = blockedEvents;
 
-            if (!slotsToTake >= 1) {
-                return;
-            }
+            // event dispatcher
+            this.eventDispatcher = new EventDispatcher(this.options.slotDuration);
+            this.eventDispatcher.loadEvents(this.events);
 
-            [].forEach.call(document.querySelectorAll('[data-id]'), function (el) {
+            // lockedEvent dispatcher
+            this.lockedEventDispatcher = new LockedEventDispatcher(this.options.slotDuration);
+            this.lockedEventDispatcher.loadEvents(this.blockedEvents);
 
-                el.addEventListener('click', function (event) {
-                    var id = event.target.dataset.id.split('#');
-                    if (!dropAllowed) {
-                        alert('Cet emplacement est déjà prit');
-                        event.stopPropagation();
-                    } else {
-                        callback(id[0], id[1]);
-                        event.stopPropagation();
-                    }
-                });
+            this._bindEvents();
+        }
+    }, {
+        key: 'addEvent',
+        value: function addEvent(event) {
+            var cell = this.eventDispatcher.addEvent(event);
+            this._attachClickEvent(cell);
+        }
+    }, {
+        key: 'removeEvent',
+        value: function removeEvent(id) {
+            console.log('Remove event ' + id);
+            var event = document.querySelector('[data-event-id="' + id + '"]');
+            [].forEach.call(document.querySelectorAll('[data-origin-id="' + id + '"]'), function (el) {
+                el.style.display = 'table-cell';
+            });
+            event.rowSpan = 1;
+            event.classList.remove('calendar-event');
+            event.innerHTML = '';
+        }
+    }, {
+        key: '_switchMode',
+        value: function _switchMode(mode) {
+            var _this = this;
 
-                el.addEventListener('mouseover', function (event) {
+            switch (mode) {
+                case ADD_MODE:
+                    this.mode.current = ADD_MODE;
+                    console.log('Entering add mode');
+                    this.uiManager.showFooter('Choisissez une plage horaire libre', function () {
+                        _this._switchMode(VIEW_MODE);
+                    });
+                    break;
+                case EDIT_MODE:
+                    console.log('Entering edit mode');
+                    break;
+                case LOCKED_MODE:
+                    this.mode.current = LOCKED_MODE;
+                    this.target.dataset.mode = LOCKED_MODE;
 
+                    console.log('Entering locked mode');
+                    this.uiManager.showFooter('Choisissez les plages horaires à bloquer', function () {
+                        _this._switchMode(VIEW_MODE);
+                    });
+                    break;
+                case VIEW_MODE:
+                    this.target.dataset.mode = VIEW_MODE;
+                    this.mode.current = VIEW_MODE;
+
+                    // clean add mode
                     [].forEach.call(document.querySelectorAll('[data-id]'), function (cell) {
                         cell.classList.remove('calendar-selection--allowed');
                         cell.classList.remove('calendar-selection--forbidden');
                     });
 
-                    var cellAdress = event.target.dataset.coordinate.split('#');
-                    var currentRow = cellAdress[0];
-                    var cells = [];
+                    console.log('Entering view mode');
+                    break;
+                default:
 
-                    var cssClass = 'calendar-selection--allowed';
-                    for (var i = 0; i < slotsToTake; i++) {
-                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                        cells.push(currentCell);
-                        if (currentCell.dataset.locked !== undefined) {
-                            cssClass = 'calendar-selection--forbidden';
-                            dropAllowed = false;
-                        } else {
-                            dropAllowed = true;
-                        }
-                        currentRow++;
+            }
+        }
+    }, {
+        key: 'startEditMode',
+        value: function startEditMode(id, callback) {
+            this.removeEvent(id);
+
+            var event = null;
+
+            this.events.forEach(function (el) {
+                if (el.id == id) {
+                    event = el;
+                }
+            });
+
+            if (event) {
+                this.startAddEventMode(event.duration, callback);
+            }
+        }
+    }, {
+        key: 'startLockedMode',
+        value: function startLockedMode() {
+            this._switchMode(LOCKED_MODE);
+        }
+    }, {
+        key: 'startAddEventMode',
+        value: function startAddEventMode(duration, callback) {
+
+            // switch to, add mode
+            this._switchMode(ADD_MODE);
+
+            this.mode.ADD_MODE.dropAllowed = true;
+            this.mode.ADD_MODE.slotsToTake = Math.floor(duration / this.options.slotDuration);
+            this.mode.ADD_MODE.callback = callback;
+
+            if (!this.mode.ADD_MODE.slotsToTake >= 1) {
+                return;
+            }
+        }
+    }, {
+        key: '_attachClickEvent',
+        value: function _attachClickEvent(el) {
+            var _this2 = this;
+
+            el.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (_this2.mode.current == VIEW_MODE) {
+                    _this2.options.onEventClick(event.target.dataset.eventId);
+                }
+            });
+        }
+    }, {
+        key: '_bindControlls',
+        value: function _bindControlls() {
+            var _this3 = this;
+
+            console.log(this);
+            this.options.ui.next.addEventListener('click', function () {
+                console.log(_this3);
+                var newDate = DateManager.addToDate(_this3.options.currentDay, _this3.options.numberOfDays);
+                _this3.options.currentDay = newDate;
+                _this3.build();
+                _this3.options.onPeriodChange.bind(_this3)(newDate, DateManager.addToDate(newDate, _this3.options.numberOfDays));
+            });
+
+            this.options.ui.prev.addEventListener('click', function () {
+                var newDate = DateManager.addToDate(_this3.options.currentDay, -_this3.options.numberOfDays);
+                _this3.options.currentDay = newDate;
+                _this3.build();
+                _this3.options.onPeriodChange.bind(_this3)(newDate, DateManager.addToDate(newDate, _this3.options.numberOfDays));
+            });
+
+            this.options.ui.today.addEventListener('click', function () {
+                var newDate = new Date();
+                _this3.options.currentDay = newDate;
+                _this3.build();
+                _this3.options.onPeriodChange.bind(_this3)(newDate, DateManager.addToDate(newDate, _this3.options.numberOfDays));
+            });
+        }
+    }, {
+        key: '_bindEvents',
+        value: function _bindEvents() {
+            var _this4 = this;
+
+            [].forEach.call(document.querySelectorAll('[data-type="event"]'), function (el) {
+                // click on event
+                _this4._attachClickEvent(el);
+            });
+
+            [].forEach.call(document.querySelectorAll('[data-id]'), function (el) {
+
+                // click on cell
+                el.addEventListener('click', function (event) {
+
+                    switch (_this4.mode.current) {
+                        case ADD_MODE:
+                            var id = event.target.dataset.id.split('#');
+                            if (!_this4.mode.ADD_MODE.dropAllowed) {
+                                alert('Cet emplacement est déjà pris');
+                                event.stopPropagation();
+                            } else {
+                                _this4.mode.ADD_MODE.callback(id[0], id[1]);
+                                event.stopPropagation();
+                            }
+                            break;
+                        default:
+
                     }
+                });
 
-                    cells.forEach(function (cell) {
-                        cell.classList.add(cssClass);
-                    });
+                // mouse down
+                el.addEventListener('mousedown', function (event) {
+                    if (_this4.mode.current == LOCKED_MODE) {
+                        _this4.mode.LOCKED_MODE.start = event.target.dataset.coordinate;
+                        _this4.mode.LOCKED_MODE.mousedown = true;
+                    }
+                });
+
+                // mouse up
+                el.addEventListener('mouseup', function (event) {
+                    if (_this4.mode.current == LOCKED_MODE) {
+                        _this4.mode.LOCKED_MODE.end = event.target.dataset.coordinate;
+                        _this4.mode.LOCKED_MODE.mousedown = false;
+
+                        _this4.options.onLocked(_this4.mode.LOCKED_MODE.start, _this4.mode.LOCKED_MODE.end, function (err, taskId) {
+                            alert('blocked event added');
+                        });
+                    }
+                });
+
+                // hovering a cell
+                el.addEventListener('mouseover', function (event) {
+
+                    switch (_this4.mode.current) {
+                        case ADD_MODE:
+
+                            [].forEach.call(document.querySelectorAll('[data-id]'), function (cell) {
+                                cell.classList.remove('calendar-selection--allowed');
+                                cell.classList.remove('calendar-selection--forbidden');
+                            });
+
+                            var cellAdress = event.target.dataset.coordinate.split('#');
+                            var currentRow = cellAdress[0];
+                            var cells = [];
+
+                            var cssClass = 'calendar-selection--allowed';
+                            for (var i = 0; i < _this4.mode.ADD_MODE.slotsToTake; i++) {
+                                var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                                cells.push(currentCell);
+                                if (currentCell.dataset.type === 'locked' || currentCell.dataset.type === 'event') {
+                                    cssClass = 'calendar-selection--forbidden';
+                                    _this4.mode.ADD_MODE.dropAllowed = false;
+                                } else {
+                                    _this4.mode.ADD_MODE.dropAllowed = true;
+                                }
+                                currentRow++;
+                            }
+
+                            cells.forEach(function (cell) {
+                                cell.classList.add(cssClass);
+                            });
+                            break;
+                        case LOCKED_MODE:
+                            if (_this4.mode.LOCKED_MODE.start !== null) {
+                                var start = _this4.mode.LOCKED_MODE.start.split('#');
+                                var current = event.target.dataset.coordinate.split('#');
+
+                                if (current[1] == start[1] && _this4.mode.LOCKED_MODE.mousedown) {
+                                    // TODO : cache cell
+                                    [].forEach.call(document.querySelectorAll('.calendar-lockedTemp'), function (el) {
+                                        el.classList.remove('calendar-lockedTemp');
+                                    });
+
+                                    var startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
+                                    var endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);
+
+                                    for (var _i = startCell; _i <= endCell; _i++) {
+                                        var cellToLocked = document.querySelector('[data-coordinate="' + _i + '#' + start[1] + '"]');
+                                        if (cellToLocked.dataset.type !== 'event') {
+                                            cellToLocked.classList.add('calendar-lockedTemp');
+                                        }
+                                    }
+                                }
+                            }
+
+                        default:
+
+                    }
                 });
             });
         }
@@ -151,7 +332,7 @@ var Calendar = function () {
 
 module.exports = Calendar;
 
-},{"./cellMatrix":2,"./dateManager":3,"./eventDispatcher":4,"./lockedEventDispatcher":5,"./ui":6}],2:[function(require,module,exports){
+},{"./cellMatrix":2,"./dateManager":3,"./eventDispatcher":4,"./eventsManager":5,"./lockedEventDispatcher":6,"./uiManager":7}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -241,7 +422,7 @@ var DateManager = function () {
 
             // then calculate other
             for (var i = 1; i < number; i++) {
-                currentDate = this.addToDate(currentDate, 1, 0, 0, 0);
+                currentDate = this.constructor.addToDate(currentDate, 1, 0, 0, 0);
                 this.days.push(currentDate);
             }
         }
@@ -283,7 +464,7 @@ var DateManager = function () {
 
             while (currentDateObject.getTime() < endDateObject.getTime()) {
                 //console.log(currentDateObject);
-                currentDateObject = this.addToDate(currentDateObject, 0, 0, slotDuration, 0);
+                currentDateObject = this.constructor.addToDate(currentDateObject, 0, 0, slotDuration, 0);
                 this.hours.push(currentDateObject);
             }
         }
@@ -302,7 +483,7 @@ var DateManager = function () {
         value: function formatLeadingZero(value) {
             return ('0' + value).slice(-2);
         }
-    }, {
+    }], [{
         key: 'addToDate',
         value: function addToDate(date) {
             var days = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -329,49 +510,60 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var EventDispatcher = function () {
-    function EventDispatcher(events, slotDuration) {
+    function EventDispatcher(slotDuration) {
         _classCallCheck(this, EventDispatcher);
 
-        this.events = events;
         this.slotDuration = slotDuration;
     }
 
     _createClass(EventDispatcher, [{
-        key: 'updateEvents',
-        value: function updateEvents() {
+        key: 'loadEvents',
+        value: function loadEvents(events) {
             var _this = this;
 
-            //console.log(this.events);
+            this.events = events;
 
             this.events.forEach(function (event) {
-                var id = event.date.getTime() + '#' + event.column;
-
-                // TODO: use caching
-                var cell = document.querySelector('[data-id="' + id + '"]');
-
-                if (!cell) {
-                    return;
-                }
-
-                // calulcate rowspan
-                var slotsToTake = Math.floor(event.duration / _this.slotDuration);
-                if (slotsToTake > 1) {
-                    // get coordinate
-                    var cellAdress = cell.dataset.coordinate.split('#');
-                    // iterate over next cell
-                    var currentRow = cellAdress[0];
-                    for (var i = 1; i < slotsToTake; i++) {
-                        currentRow++;
-
-                        // TODO: use caching
-                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                        currentCell.style['background-color'] = 'red';
-                        currentCell.style.display = 'none';
-                    }
-                }
-                cell.rowSpan = slotsToTake;
-                cell.innerHTML = event.title;
+                _this.addEvent(event);
             });
+        }
+    }, {
+        key: 'addEvent',
+        value: function addEvent(event) {
+            var id = event.date.getTime() + '#' + event.column;
+
+            // TODO: use caching
+            var cell = document.querySelector('[data-id="' + id + '"]');
+
+            if (!cell) {
+                return;
+            }
+
+            cell.dataset.type = 'event';
+            cell.dataset.eventId = event.id;
+            cell.classList.add('calendar-event');
+
+            // calulcate rowspan
+            var slotsToTake = Math.floor(event.duration / this.slotDuration);
+            if (slotsToTake > 1) {
+                // get coordinate
+                var cellAdress = cell.dataset.coordinate.split('#');
+                // iterate over next cell
+                var currentRow = cellAdress[0];
+                for (var i = 1; i < slotsToTake; i++) {
+                    currentRow++;
+
+                    // TODO: use caching
+                    var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                    //currentCell.style['background-color'] = 'red';
+                    currentCell.dataset.originId = event.id;
+                    currentCell.style.display = 'none';
+                }
+            }
+            cell.rowSpan = slotsToTake;
+            cell.innerHTML = event.title;
+
+            return cell;
         }
     }]);
 
@@ -383,51 +575,69 @@ module.exports = EventDispatcher;
 },{}],5:[function(require,module,exports){
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EventsManager = function EventsManager() {
+    _classCallCheck(this, EventsManager);
+
+    console.log('New event manager');
+};
+
+module.exports = EventsManager;
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var LockedEventDispatcher = function () {
-    function LockedEventDispatcher(lockedEvents, slotDuration) {
+    function LockedEventDispatcher(slotDuration) {
         _classCallCheck(this, LockedEventDispatcher);
 
-        this.lockedEvents = lockedEvents;
         this.slotDuration = slotDuration;
     }
 
     _createClass(LockedEventDispatcher, [{
-        key: 'updateEvents',
-        value: function updateEvents() {
+        key: 'loadEvents',
+        value: function loadEvents(lockedEvents) {
             var _this = this;
 
+            this.lockedEvents = lockedEvents;
+
             this.lockedEvents.forEach(function (lockedEvent) {
-
-                var id = lockedEvent.start.getTime() + '#' + lockedEvent.column;
-
-                // TODO: use caching
-                var cell = document.querySelector('[data-id="' + id + '"]');
-
-                if (!cell) {
-                    return;
-                }
-
-                var duration = (lockedEvent.end.getTime() - lockedEvent.start.getTime()) / 60 / 1000;
-                var slotsToTake = Math.floor(duration / _this.slotDuration);
-
-                if (slotsToTake > 1) {
-                    // get coordinate
-                    var cellAdress = cell.dataset.coordinate.split('#');
-                    // iterate over next cell
-                    var currentRow = cellAdress[0];
-                    for (var i = 0; i < slotsToTake; i++) {
-                        // TODO: use caching
-                        var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                        currentCell.classList.add('calendar-locked');
-                        currentCell.dataset.locked = '';
-                        currentRow++;
-                    }
-                }
+                _this.addEvent(lockedEvent);
             });
+        }
+    }, {
+        key: 'addEvent',
+        value: function addEvent(lockedEvent) {
+            var id = lockedEvent.start.getTime() + '#' + lockedEvent.column;
+
+            // TODO: use caching
+            var cell = document.querySelector('[data-id="' + id + '"]');
+
+            if (!cell) {
+                return;
+            }
+
+            var duration = (lockedEvent.end.getTime() - lockedEvent.start.getTime()) / 60 / 1000;
+            var slotsToTake = Math.floor(duration / this.slotDuration);
+
+            if (slotsToTake > 1) {
+                // get coordinate
+                var cellAdress = cell.dataset.coordinate.split('#');
+                // iterate over next cell
+                var currentRow = cellAdress[0];
+                for (var i = 0; i < slotsToTake; i++) {
+                    // TODO: use caching
+                    var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
+                    currentCell.classList.add('calendar-locked');
+                    currentCell.dataset.type = 'locked';
+                    currentRow++;
+                }
+            }
         }
     }]);
 
@@ -436,7 +646,7 @@ var LockedEventDispatcher = function () {
 
 module.exports = LockedEventDispatcher;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -451,6 +661,14 @@ var UIManager = function () {
         this.options = options;
         this.events = events;
         this.dateManager = dateManager;
+
+        this.ui = {
+            footer: this._buildFooter()
+        };
+
+        this.listener = {
+            footerBtn: null
+        };
     }
 
     _createClass(UIManager, [{
@@ -460,13 +678,12 @@ var UIManager = function () {
             var dayLabels = this._buildDayLabel();
             var header = this._buildHeader();
             var body = this._buildDays();
+            var footer = this._buildFooter();
 
             header.appendChild(dayLabels);
 
-            if (this.options.showBulkActions) {
-                var bulkActions = this._buildBulkActions();
-                header.appendChild(bulkActions);
-            }
+            var bulkActions = this._buildBulkActions();
+            header.appendChild(bulkActions);
 
             table.appendChild(header);
             table.appendChild(body);
@@ -476,7 +693,31 @@ var UIManager = function () {
                 this.target.removeChild(this.target.querySelector('table'));
             }
 
+            this.target.innerHTML = '';
             this.target.appendChild(table);
+
+            // append footer
+            document.body.append(this.ui.footer.wrapper);
+        }
+    }, {
+        key: 'showFooter',
+        value: function showFooter(text, callback) {
+            var _this = this;
+
+            this.ui.footer.message.innerHTML = text;
+            setTimeout(function () {
+                _this.ui.footer.wrapper.classList.add('calendar-mode--active');
+            }, 10);
+
+            this.ui.footer.btn.addEventListener('click', function (event) {
+                callback();
+                _this.hideFooter();
+            });
+        }
+    }, {
+        key: 'hideFooter',
+        value: function hideFooter() {
+            this.ui.footer.wrapper.classList.remove('calendar-mode--active');
         }
     }, {
         key: '_buildTable',
@@ -524,8 +765,10 @@ var UIManager = function () {
                 if (firstIteration) {
                     firstIteration = false;
                     th.innerHTML = '';
+                    th.classList.add('calendar-bulk');
                 } else {
                     th.innerHTML = 'bloquer';
+                    th.classList.add('calendar-bulk');
                 }
 
                 bulkActionsLine.appendChild(th);
@@ -536,7 +779,7 @@ var UIManager = function () {
     }, {
         key: '_buildDays',
         value: function _buildDays() {
-            var _this = this;
+            var _this2 = this;
 
             var numberOfcol = this.options.columnsPerDay * this.options.numberOfDays + 1;
             var tbody = document.createElement('tbody');
@@ -550,11 +793,11 @@ var UIManager = function () {
 
                     // hours label
                     if (firstIteration) {
-                        td.innerHTML = _this.dateManager.getHoursLabel(index);
+                        td.innerHTML = _this2.dateManager.getHoursLabel(index);
                         firstIteration = false;
                     } else {
-                        td.dataset.id = _this.getCellId(index, j - 1);
-                        td.dataset.coordinate = _this.getCellCoordinate(index, j - 1);
+                        td.dataset.id = _this2.getCellId(index, j - 1);
+                        td.dataset.coordinate = _this2.getCellCoordinate(index, j - 1);
 
                         //td.innerHTML = this.getCellId(index, j - 1);
                         //td.innerHTML = this.dateManager.hours[index];
@@ -569,13 +812,35 @@ var UIManager = function () {
 
             return tbody;
         }
+    }, {
+        key: '_buildFooter',
+        value: function _buildFooter(text) {
+            var footer = document.createElement('div');
+            footer.classList.add('calendar-mode');
+            footer.innerHTML = '';
+
+            var message = document.createElement('span');
+            message.innerHTML = '';
+
+            var footerBtn = document.createElement('button');
+            footerBtn.innerText = 'Annuler';
+
+            footer.appendChild(message);
+            footer.appendChild(footerBtn);
+
+            return {
+                message: message,
+                wrapper: footer,
+                btn: footerBtn
+            };
+        }
 
         /**
-         * Get cell id (timestamp#col)
-         * @param  {[type]} index  [description]
-         * @param  {[type]} column [description]
-         * @return [type]          [description]
-         */
+        * Get cell id (timestamp#col)
+        * @param  {[type]} index  [description]
+        * @param  {[type]} column [description]
+        * @return [type]          [description]
+        */
 
     }, {
         key: 'getCellId',
@@ -593,11 +858,11 @@ var UIManager = function () {
         }
 
         /**
-         * Get cell coordinates (row#column)
-         * @param  {[type]} index  [description]
-         * @param  {[type]} column [description]
-         * @return [type]          [description]
-         */
+        * Get cell coordinates (row#column)
+        * @param  {[type]} index  [description]
+        * @param  {[type]} column [description]
+        * @return [type]          [description]
+        */
 
     }, {
         key: 'getCellCoordinate',

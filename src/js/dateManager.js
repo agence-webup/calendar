@@ -19,7 +19,7 @@ class DateManager {
 
         // then calculate other
         for(let i = 1; i < number; i++) {
-            currentDate = this.addToDate(currentDate, 1, 0, 0, 0);
+            currentDate = this.constructor.addToDate(currentDate, 1, 0, 0, 0);
             this.days.push(currentDate);
         }
     }
@@ -60,7 +60,7 @@ class DateManager {
 
         while(currentDateObject.getTime() < endDateObject.getTime()) {
             //console.log(currentDateObject);
-            currentDateObject = this.addToDate(currentDateObject, 0, 0, slotDuration, 0);
+            currentDateObject = this.constructor.addToDate(currentDateObject, 0, 0, slotDuration, 0);
             this.hours.push(currentDateObject);
         }
     }
@@ -78,7 +78,7 @@ class DateManager {
     }
 
 
-    addToDate(date, days = 0, hours = 0, minutes = 0, seconds = 0) {
+    static addToDate(date, days = 0, hours = 0, minutes = 0, seconds = 0) {
         var returnDate = new Date(
             date.getFullYear(),
             date.getMonth(),
