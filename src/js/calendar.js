@@ -168,9 +168,7 @@ class Calendar {
     }
 
     _bindControlls() {
-        console.log(this);
         this.options.ui.next.addEventListener('click', () => {
-            console.log(this);
             let newDate = DateManager.addToDate(this.options.currentDay, this.options.numberOfDays);
             this.options.currentDay = newDate;
             this.build();
