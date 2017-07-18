@@ -24,7 +24,7 @@ Création de la base :
 <div id="calendar"></div>
 ```
 
-En ce qui concerne les contrôle, la base est libre, il suffit juste de bien spécifier les ID et de les passer dans options.ui :
+En ce qui concerne les contrôles, la base est libre, il suffit juste de bien spécifier les ID et de les passer dans options.ui :
 
 ```html
 <button id="prev"><</button>
