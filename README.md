@@ -99,4 +99,3 @@ calendar.startEditMode(1, (timestamp, column) => {
 ```javascript
 calendar.startLockedMode();
 ```
-calendar.startEditMode(1, (timestamp, column) => {
