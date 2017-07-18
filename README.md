@@ -74,8 +74,8 @@ let calendar = new Calendar("#calendar", {
 | méthode  | explication |
 |---|---|
 | onEventClicked  | Appelé lors du clic sur un évènement. Renvoi l'identifiant de l'évènement  |
-| onLocked  | Appelé lors du blocage d'une plage horaire. Renvoi le début et la fin de la plage, ainsi qu'un callback devant ê tre utilisé pour confirmer l'ajout de la plage après le traitement côté serveur |
-| onPeriodChange | Appelé lors d'un changement de période avec les boutons suivant, précédent et aujourd'hui. Renvoi la début et la fin de la nouvelle période. __Important:__ il est nécessaire de penser à recharger les évènements liés à cette nouvelle période en utilisant la méthode loadEvents  |
+| onLocked  | Appelé lors du blocage d'une plage horaire. Renvoi le début et la fin de la plage, ainsi qu'un callback devant être utilisé pour confirmer l'ajout de la plage après le traitement côté serveur |
+| onPeriodChange | Appelé lors d'un changement de période avec les boutons suivant, précédent et aujourd'hui. Renvoi le début et la fin de la nouvelle période. __Important:__ il est nécessaire de penser à recharger les évènements liés à cette nouvelle période en utilisant la méthode loadEvents  |
 
 ## Modes
 
