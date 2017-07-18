@@ -181,7 +181,7 @@ var Calendar = function () {
             el.addEventListener('click', function (event) {
                 event.stopPropagation();
                 if (_this2.mode.current == VIEW_MODE) {
-                    _this2.options.onEventClick(event.target.dataset.eventId);
+                    _this2.options.onEventClicked(event.target.dataset.eventId);
                 }
             });
         }
