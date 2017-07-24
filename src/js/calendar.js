@@ -22,8 +22,9 @@ class Calendar {
         this.mode = {
             current: VIEW_MODE,
             ADD_MODE: {
+                dropAllowed: null,
                 slotsToTake: null,
-                dropAllowed: null
+                callback: null
             },
             LOCKED_MODE: {
                 mousedown: false,
@@ -123,6 +124,21 @@ class Calendar {
 
     }
 
+    resetMode() {
+        switch(this.mode.current) {
+            case ADD_MODE:
+            this.mode.ADD_MODE: {
+                dropAllowed: null,
+                slotsToTake: null,
+                callback: null
+            }
+            break;
+        }
+
+        this.uiManager.hideFooter();
+        this._switchMode(VIEW_MODE);
+    }
+
     startEditMode(id, callback) {
         this.removeEvent(id);
 
@@ -216,7 +232,6 @@ class Calendar {
                     default:
 
                 }
-
             });
 
             // mouse down

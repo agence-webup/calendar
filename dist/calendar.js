@@ -28,8 +28,9 @@ var Calendar = function () {
         this.mode = {
             current: VIEW_MODE,
             ADD_MODE: {
+                dropAllowed: null,
                 slotsToTake: null,
-                dropAllowed: null
+                callback: null
             },
             LOCKED_MODE: {
                 mousedown: false,
@@ -135,6 +136,12 @@ var Calendar = function () {
                 default:
 
             }
+        }
+    }, {
+        key: 'resetMode',
+        value: function resetMode() {
+            this.uiManager.hideFooter();
+            this._switchMode(VIEW_MODE);
         }
     }, {
         key: 'startEditMode',

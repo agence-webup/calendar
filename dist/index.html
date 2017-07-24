@@ -60,6 +60,7 @@
             <button id="add">Add task</button>
             <button id="edit">Edit task 1</button>
             <button id="block">Blocked mode</button>
+            <button id="reset">Reset</button>
         </div>
         <div id="calendar"></div>
     </div>
@@ -162,6 +163,9 @@
         calendar.startLockedMode();
     });
 
+    document.querySelector('#reset').addEventListener('click', () => {
+        calendar.resetMode();
+    });
 
     </script>
 </body>
