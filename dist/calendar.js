@@ -190,9 +190,7 @@ var Calendar = function () {
         value: function _bindControlls() {
             var _this3 = this;
 
-            console.log(this);
             this.options.ui.next.addEventListener('click', function () {
-                console.log(_this3);
                 var newDate = DateManager.addToDate(_this3.options.currentDay, _this3.options.numberOfDays);
                 _this3.options.currentDay = newDate;
                 _this3.build();
@@ -227,16 +225,15 @@ var Calendar = function () {
 
                 // click on cell
                 el.addEventListener('click', function (event) {
+                    event.stopPropagation();
 
                     switch (_this4.mode.current) {
                         case ADD_MODE:
                             var id = event.target.dataset.id.split('#');
                             if (!_this4.mode.ADD_MODE.dropAllowed) {
                                 alert('Cet emplacement est déjà pris');
-                                event.stopPropagation();
                             } else {
                                 _this4.mode.ADD_MODE.callback(id[0], id[1]);
-                                event.stopPropagation();
                             }
                             break;
                         default:
@@ -280,16 +277,22 @@ var Calendar = function () {
                             var cells = [];
 
                             var cssClass = 'calendar-selection--allowed';
+                            var dropAllowed = true;
+
                             for (var i = 0; i < _this4.mode.ADD_MODE.slotsToTake; i++) {
                                 var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                                 cells.push(currentCell);
                                 if (currentCell.dataset.type === 'locked' || currentCell.dataset.type === 'event') {
                                     cssClass = 'calendar-selection--forbidden';
-                                    _this4.mode.ADD_MODE.dropAllowed = false;
-                                } else {
-                                    _this4.mode.ADD_MODE.dropAllowed = true;
+                                    dropAllowed = false;
                                 }
                                 currentRow++;
+                            }
+
+                            if (dropAllowed) {
+                                _this4.mode.ADD_MODE.dropAllowed = true;
+                            } else {
+                                _this4.mode.ADD_MODE.dropAllowed = false;
                             }
 
                             cells.forEach(function (cell) {

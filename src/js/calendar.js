@@ -202,16 +202,15 @@ class Calendar {
 
             // click on cell
             el.addEventListener('click', (event) => {
+                event.stopPropagation();
 
                 switch (this.mode.current) {
                     case ADD_MODE:
                     let id = event.target.dataset.id.split('#');
                     if(!this.mode.ADD_MODE.dropAllowed) {
                         alert('Cet emplacement est déjà pris');
-                        event.stopPropagation();
                     } else {
                         this.mode.ADD_MODE.callback(id[0], id[1]);
-                        event.stopPropagation();
                     }
                     break;
                     default:
@@ -257,16 +256,22 @@ class Calendar {
                     let cells = [];
 
                     let cssClass = 'calendar-selection--allowed';
+                    let dropAllowed = true;
+
                     for(let i = 0; i < this.mode.ADD_MODE.slotsToTake ; i++) {
                         let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                         cells.push(currentCell);
                         if(currentCell.dataset.type === 'locked' || currentCell.dataset.type === 'event') {
                             cssClass = 'calendar-selection--forbidden';
-                            this.mode.ADD_MODE.dropAllowed = false;
-                        } else {
-                            this.mode.ADD_MODE.dropAllowed = true;
+                            dropAllowed = false;
                         }
                         currentRow++;
+                    }
+
+                    if(dropAllowed) {
+                        this.mode.ADD_MODE.dropAllowed = true;
+                    } else {
+                        this.mode.ADD_MODE.dropAllowed = false;
                     }
 
                     cells.forEach((cell) => {
