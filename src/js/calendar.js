@@ -30,7 +30,10 @@ class Calendar {
                 mousedown: false,
                 start: null,
                 end: null,
-                stack: []
+                stack: [{
+                    start: null,
+                    end: null
+                }]
             }
         }
 
@@ -45,12 +48,12 @@ class Calendar {
 
     build() {
         // handle date (build days and hours arrays)
-        let dateManager = new DateManager(this.options.currentDay);
-        dateManager.generateDays(this.options.numberOfDays);
-        dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
+        this.dateManager = new DateManager(this.options.currentDay);
+        this.dateManager.generateDays(this.options.numberOfDays);
+        this.dateManager.generateHours(this.options.dayStartHour, this.options.dayEndHour, this.options.slotDuration);
 
         // build ui and add ID to cell
-        this.uiManager = new UIManager(this.target, this.options, this.events, dateManager);
+        this.uiManager = new UIManager(this.target, this.options, this.events, this.dateManager);
         this.uiManager.build();
     }
 
@@ -89,22 +92,20 @@ class Calendar {
         switch (mode) {
             case ADD_MODE:
             this.mode.current = ADD_MODE;
-            console.log('Entering add mode');
             this.uiManager.showFooter('Choisissez une plage horaire libre', () => {
                 this._switchMode(VIEW_MODE);
             });
             break;
             case EDIT_MODE:
-            console.log('Entering edit mode');
             break;
             case LOCKED_MODE:
             this.mode.current = LOCKED_MODE;
             this.target.dataset.mode = LOCKED_MODE;
 
-            console.log('Entering locked mode');
             this.uiManager.showFooter('Choisissez les plages horaires à bloquer', () => {
-                this._switchMode(VIEW_MODE);
+                this.resetMode();
             });
+
             break;
             case VIEW_MODE:
             this.target.dataset.mode = VIEW_MODE;
@@ -133,6 +134,12 @@ class Calendar {
                 callback: null
             }
             break;
+            case LOCKED_MODE:
+            [].forEach.call(document.querySelectorAll('[data-locked-temp]'), function(cell) {
+                cell.classList.remove('calendar-lockedTemp');
+                cell.removeAttribute('data-locked-temp');
+            });
+            break;
         }
 
         this.uiManager.hideFooter();
@@ -158,6 +165,48 @@ class Calendar {
     startLockedMode() {
         this._switchMode(LOCKED_MODE);
     };
+
+    commitLocked(callback) {
+        let colNumber = this.options.numberOfDays * this.options.columnsPerDay;
+        let lineNumber = this.dateManager.hours.length;
+        let samePeriod = false;
+        for(let i = 1; i <= colNumber; i++) {
+            for(let j = 1; j <= lineNumber; j++ ) {
+                let currentCell = document.querySelector('[data-coordinate="' + j + '#' + i + '"]');
+                let id = currentCell.dataset.id.split('#');
+                let lastItem = this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1];
+                if(currentCell.hasAttribute('data-locked-temp') && lastItem.start === null) {
+                    lastItem.start = new Date(parseInt(id[0]));
+                } else if (!currentCell.hasAttribute('data-locked-temp') && lastItem.end === null && lastItem.start !== null) {
+                    lastItem.end = new Date(parseInt(id[0]));
+                    this.mode.LOCKED_MODE.stack.push({
+                        start: null,
+                        end: null
+                    })
+                }
+            }
+        }
+
+        [].forEach.call(document.querySelectorAll('[data-locked-temp]'), (el) => {
+            el.classList.add('calendar-locked');
+            el.classList.remove('calendar-lockedTemp');
+            el.removeAttribute('data-locked-temp');
+        });
+
+        // TODO: refactoring
+        if(this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1].start === null) {
+            this.mode.LOCKED_MODE.stack.splice(-1, 1);
+        }
+
+        callback(this.mode.LOCKED_MODE.stack);
+
+        this.mode.LOCKED_MODE.stack = [{
+            start: null,
+            end: null
+        }];
+
+        this.resetMode();
+    }
 
     startAddEventMode(duration, callback) {
 
@@ -302,20 +351,15 @@ class Calendar {
                         let current = event.target.dataset.coordinate.split('#');
 
                         if(current[1] == start[1] && this.mode.LOCKED_MODE.mousedown) {
-                            // TODO : cache cell
-                            /*
-                            [].forEach.call(document.querySelectorAll('.calendar-lockedTemp'), function(el) {
-                                el.classList.remove('calendar-lockedTemp');
-                            });*/
 
                             let startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
                             let endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);
 
                             for(let i = startCell; i <= endCell; i++) {
                                 let cellToLocked = document.querySelector('[data-coordinate="' + i + '#' + start[1] + '"]');
-                                console.log(cellToLocked.dataset.type);
                                 if(cellToLocked.dataset.type !== 'event' || cellToLocked.dataset.type !== 'locked') {
                                     cellToLocked.classList.add('calendar-lockedTemp');
+                                    cellToLocked.dataset.lockedTemp = '';
                                 }
                             }
                         }
