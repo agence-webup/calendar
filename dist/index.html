@@ -148,8 +148,15 @@
     calendar.loadEvents(events, blockedEvents);
 
     document.querySelector('#add').addEventListener('click', () => {
-        calendar.startAddEventMode(60, (timestamp, column) => {
-            alert('Drop on column ' + column + ' at ' + timestamp);
+        calendar.startAddEventMode(60, (date, column) => {
+            calendar.addEvent({
+                id: 4,
+                title: 'Event added',
+                date: date,
+                column: column,
+                duration: 60
+            });
+            alert('Drop on column ' + column + ' at ' + date);
         });
     });
 

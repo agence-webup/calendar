@@ -140,6 +140,16 @@ var Calendar = function () {
     }, {
         key: 'resetMode',
         value: function resetMode() {
+            switch (this.mode.current) {
+                case ADD_MODE:
+                    this.mode.ADD_MODE = {
+                        dropAllowed: null,
+                        slotsToTake: null,
+                        callback: null
+                    };
+                    break;
+            }
+
             this.uiManager.hideFooter();
             this._switchMode(VIEW_MODE);
         }
@@ -240,7 +250,10 @@ var Calendar = function () {
                             if (!_this4.mode.ADD_MODE.dropAllowed) {
                                 alert('Cet emplacement est déjà pris');
                             } else {
-                                _this4.mode.ADD_MODE.callback(id[0], id[1]);
+                                // call back method with date and column
+                                var date = new Date(parseInt(id[0]));
+                                _this4.mode.ADD_MODE.callback(date, id[1]);
+                                _this4.resetMode();
                             }
                             break;
                         default:
@@ -263,7 +276,7 @@ var Calendar = function () {
                         _this4.mode.LOCKED_MODE.mousedown = false;
 
                         _this4.options.onLocked(_this4.mode.LOCKED_MODE.start, _this4.mode.LOCKED_MODE.end, function (err, taskId) {
-                            alert('blocked event added');
+                            //alert('blocked event added');
                         });
                     }
                 });
@@ -313,16 +326,18 @@ var Calendar = function () {
 
                                 if (current[1] == start[1] && _this4.mode.LOCKED_MODE.mousedown) {
                                     // TODO : cache cell
-                                    [].forEach.call(document.querySelectorAll('.calendar-lockedTemp'), function (el) {
+                                    /*
+                                    [].forEach.call(document.querySelectorAll('.calendar-lockedTemp'), function(el) {
                                         el.classList.remove('calendar-lockedTemp');
-                                    });
+                                    });*/
 
                                     var startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
                                     var endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);
 
                                     for (var _i = startCell; _i <= endCell; _i++) {
                                         var cellToLocked = document.querySelector('[data-coordinate="' + _i + '#' + start[1] + '"]');
-                                        if (cellToLocked.dataset.type !== 'event') {
+                                        console.log(cellToLocked.dataset.type);
+                                        if (cellToLocked.dataset.type !== 'event' || cellToLocked.dataset.type !== 'locked') {
                                             cellToLocked.classList.add('calendar-lockedTemp');
                                         }
                                     }

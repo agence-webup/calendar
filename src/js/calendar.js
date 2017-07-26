@@ -127,7 +127,7 @@ class Calendar {
     resetMode() {
         switch(this.mode.current) {
             case ADD_MODE:
-            this.mode.ADD_MODE: {
+            this.mode.ADD_MODE = {
                 dropAllowed: null,
                 slotsToTake: null,
                 callback: null
@@ -226,7 +226,10 @@ class Calendar {
                     if(!this.mode.ADD_MODE.dropAllowed) {
                         alert('Cet emplacement est déjà pris');
                     } else {
-                        this.mode.ADD_MODE.callback(id[0], id[1]);
+                        // call back method with date and column
+                        let date = new Date(parseInt(id[0]));
+                        this.mode.ADD_MODE.callback(date, id[1]);
+                        this.resetMode();
                     }
                     break;
                     default:
@@ -249,7 +252,7 @@ class Calendar {
                     this.mode.LOCKED_MODE.mousedown = false;
 
                     this.options.onLocked(this.mode.LOCKED_MODE.start, this.mode.LOCKED_MODE.end, (err, taskId) => {
-                        alert('blocked event added');
+                        //alert('blocked event added');
                     });
 
                 }
@@ -300,16 +303,18 @@ class Calendar {
 
                         if(current[1] == start[1] && this.mode.LOCKED_MODE.mousedown) {
                             // TODO : cache cell
+                            /*
                             [].forEach.call(document.querySelectorAll('.calendar-lockedTemp'), function(el) {
                                 el.classList.remove('calendar-lockedTemp');
-                            });
+                            });*/
 
                             let startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
                             let endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);
 
                             for(let i = startCell; i <= endCell; i++) {
                                 let cellToLocked = document.querySelector('[data-coordinate="' + i + '#' + start[1] + '"]');
-                                if(cellToLocked.dataset.type !== 'event') {
+                                console.log(cellToLocked.dataset.type);
+                                if(cellToLocked.dataset.type !== 'event' || cellToLocked.dataset.type !== 'locked') {
                                     cellToLocked.classList.add('calendar-lockedTemp');
                                 }
                             }
