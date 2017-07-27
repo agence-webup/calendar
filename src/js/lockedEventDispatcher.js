@@ -29,7 +29,7 @@ class LockedEventDispatcher {
         let slotsToTake = Math.floor(duration / this.slotDuration);
 
 
-        if(slotsToTake > 1) {
+        if(slotsToTake >= 1) {
             // get coordinate
             let cellAdress = cell.dataset.coordinate.split('#');
             // iterate over next cell

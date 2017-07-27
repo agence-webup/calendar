@@ -615,7 +615,8 @@ var EventDispatcher = function () {
 
             // calulcate rowspan
             var slotsToTake = Math.floor(event.duration / this.slotDuration);
-            if (slotsToTake > 1) {
+
+            if (slotsToTake >= 1) {
                 // get coordinate
                 var cellAdress = cell.dataset.coordinate.split('#');
                 // iterate over next cell
@@ -695,7 +696,7 @@ var LockedEventDispatcher = function () {
             var duration = (lockedEvent.end.getTime() - lockedEvent.start.getTime()) / 60 / 1000;
             var slotsToTake = Math.floor(duration / this.slotDuration);
 
-            if (slotsToTake > 1) {
+            if (slotsToTake >= 1) {
                 // get coordinate
                 var cellAdress = cell.dataset.coordinate.split('#');
                 // iterate over next cell
