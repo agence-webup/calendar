@@ -79,7 +79,6 @@ class Calendar {
     }
 
     removeEvent(id) {
-        console.log('Remove event ' + id);
         let event = document.querySelector('[data-event-id="' + id + '"]');
         [].forEach.call(document.querySelectorAll('[data-origin-id="' + id + '"]'), (el) => {
             el.style.display = 'table-cell';
@@ -87,6 +86,11 @@ class Calendar {
         event.rowSpan = 1;
         event.classList.remove('calendar-event');
         event.innerHTML = '';
+        this.events.forEach((el, index) => {
+            if(el.id === id) {
+                this.events.splice(index, 1);
+            }
+        });
     }
 
     _switchMode(mode) {
