@@ -100,7 +100,7 @@ calendar.startEditMode(1, (timestamp, column) => {
 calendar.startLockedMode();
 ```
 
-### Remove event with id 1
+### Supprimer un évènement (ex: evènement avec l'id 1)
 ```javascript
 calendar.removeEvent(1);
 ```
