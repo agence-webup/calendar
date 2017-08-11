@@ -38,7 +38,8 @@ var Calendar = function () {
                 end: null,
                 stack: [{
                     start: null,
-                    end: null
+                    end: null,
+                    column: null
                 }]
             }
         };
@@ -192,14 +193,21 @@ var Calendar = function () {
                 for (var j = 1; j <= lineNumber; j++) {
                     var currentCell = document.querySelector('[data-coordinate="' + j + '#' + i + '"]');
                     var id = currentCell.dataset.id.split('#');
+
                     var lastItem = this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1];
+
                     if (currentCell.hasAttribute('data-locked-temp') && lastItem.start === null) {
                         lastItem.start = new Date(parseInt(id[0]));
+
+                        // retrieve column based on day
+                        var coordinates = currentCell.dataset.coordinate.split('#');
+                        lastItem.column = coordinates[1] % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : coordinates[1] % this.options.columnsPerDay;
                     } else if (!currentCell.hasAttribute('data-locked-temp') && lastItem.end === null && lastItem.start !== null) {
                         lastItem.end = new Date(parseInt(id[0]));
                         this.mode.LOCKED_MODE.stack.push({
                             start: null,
-                            end: null
+                            end: null,
+                            column: null
                         });
                     }
                 }
@@ -220,7 +228,8 @@ var Calendar = function () {
 
             this.mode.LOCKED_MODE.stack = [{
                 start: null,
-                end: null
+                end: null,
+                column: null
             }];
 
             this.resetMode();
@@ -324,10 +333,6 @@ var Calendar = function () {
                     if (_this4.mode.current == LOCKED_MODE) {
                         _this4.mode.LOCKED_MODE.end = event.target.dataset.coordinate;
                         _this4.mode.LOCKED_MODE.mousedown = false;
-
-                        _this4.options.onLocked(_this4.mode.LOCKED_MODE.start, _this4.mode.LOCKED_MODE.end, function (err, taskId) {
-                            //alert('blocked event added');
-                        });
                     }
                 });
 

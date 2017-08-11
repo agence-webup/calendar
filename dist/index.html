@@ -72,28 +72,28 @@
         {
             id: 1,
             title: 'Event 1',
-            date: new Date(2017, 6, 26, 10, 0, 0, 0),
+            date: new Date(2017, 7, 11, 10, 0, 0, 0),
             column: 2,
             duration: 80
         },
         {
             id: 2,
             title: 'Event 2',
-            date: new Date(2017, 6, 26, 9, 0, 0, 0),
+            date: new Date(2017, 7, 12, 9, 0, 0, 0),
             column: 1,
             duration: 40
         },
         {
             id: 3,
             title: 'Event 3',
-            date: new Date(2017, 6, 26, 14, 0, 0, 0),
+            date: new Date(2017, 7, 12, 14, 0, 0, 0),
             column: 3,
             duration: 40
         },
         {
             id: 3,
             title: 'Event 4',
-            date: new Date(2017, 6, 26, 14, 0, 0, 0),
+            date: new Date(2017, 7, 13, 14, 0, 0, 0),
             column: 3,
             duration: 120
         }
@@ -101,13 +101,13 @@
 
     var blockedEvents = [
         {
-            start: new Date(2017, 6, 27, 12, 0, 0, 0),
-            end: new Date(2017, 6, 27, 12, 20, 0, 0),
+            start: new Date(2017, 7, 12, 12, 0, 0, 0),
+            end: new Date(2017, 7, 12, 12, 20, 0, 0),
             column: 1,
         },
         {
-            start: new Date(2017, 6, 28, 8, 0, 0, 0),
-            end: new Date(2017, 6, 28, 14, 0, 0, 0),
+            start: new Date(2017, 7, 13, 9, 0, 0, 0),
+            end: new Date(2017, 7, 13, 12, 0, 0, 0),
             column: 3,
         }
     ];
@@ -116,8 +116,8 @@
         currentDay: new Date(),
         numberOfDays: 3,
         columnsPerDay: 3,
-        dayStartHour: '08:00',
-        dayEndHour: '18:00',
+        dayStartHour: '09:00',
+        dayEndHour: '16:00',
         slotDuration: 20,
         cssClass: 'calendar',
         ui: {
@@ -127,17 +127,6 @@
         },
         onEventClicked: function(eventId) {
             alert('Event clicked: ' + eventId);
-        },
-        onLocked: function(start, end, callback) {
-            //console.log(start + '->' + end);
-            setTimeout(() => {
-                // commit event
-                callback(null, {
-                    start: new Date(2017, 6, 11, 12, 0, 0, 0),
-                    end: new Date(2017, 6, 11, 14, 0, 0, 0),
-                    column: 1,
-                });
-            }, 1000);
         },
         onPeriodChange: function(start, end) {
             //console.log(start + ' ->', end);
