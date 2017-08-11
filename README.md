@@ -99,3 +99,8 @@ calendar.startEditMode(1, (timestamp, column) => {
 ```javascript
 calendar.startLockedMode();
 ```
+
+### Remove event with id 1
+```javascript
+calendar.removeEvent(1);
+```
