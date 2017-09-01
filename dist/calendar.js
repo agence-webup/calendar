@@ -41,6 +41,9 @@ var Calendar = function () {
                     end: null,
                     column: null
                 }]
+            },
+            EDIT_MODE: {
+                event: null
             }
         };
 
@@ -86,6 +89,7 @@ var Calendar = function () {
         key: 'addEvent',
         value: function addEvent(event) {
             var cell = this.eventDispatcher.addEvent(event);
+            this.events.push(event);
             this._attachClickEvent(cell);
         }
     }, {
@@ -115,10 +119,15 @@ var Calendar = function () {
                 case ADD_MODE:
                     this.mode.current = ADD_MODE;
                     this.uiManager.showFooter('Choisissez une plage horaire libre', function () {
+                        // if we were previously in edit mode
+                        if (_this2.mode.EDIT_MODE.event !== null) {
+                            _this2.addEvent(_this2.mode.EDIT_MODE.event);
+                        }
                         _this2._switchMode(VIEW_MODE);
                     });
                     break;
                 case EDIT_MODE:
+                    this.mode.current = EDIT_MODE;
                     break;
                 case LOCKED_MODE:
                     this.mode.current = LOCKED_MODE;
@@ -170,19 +179,20 @@ var Calendar = function () {
     }, {
         key: 'startEditMode',
         value: function startEditMode(id, callback) {
-            this.removeEvent(id);
-
-            var event = null;
+            var _this3 = this;
 
             this.events.forEach(function (el) {
                 if (el.id == id) {
-                    event = el;
+                    // cache edited event
+                    _this3.mode.EDIT_MODE.event = el;
+
+                    // remove event
+                    _this3.removeEvent(id);
+
+                    // start edit mode
+                    _this3.startAddEventMode(el.duration, callback);
                 }
             });
-
-            if (event) {
-                this.startAddEventMode(event.duration, callback);
-            }
         }
     }, {
         key: 'startLockedMode',
@@ -258,49 +268,49 @@ var Calendar = function () {
     }, {
         key: '_attachClickEvent',
         value: function _attachClickEvent(el) {
-            var _this3 = this;
+            var _this4 = this;
 
             el.addEventListener('click', function (event) {
                 event.stopPropagation();
-                if (_this3.mode.current == VIEW_MODE) {
-                    _this3.options.onEventClicked(event.target.dataset.eventId);
+                if (_this4.mode.current == VIEW_MODE) {
+                    _this4.options.onEventClicked(event.target.dataset.eventId);
                 }
             });
         }
     }, {
         key: '_bindControlls',
         value: function _bindControlls() {
-            var _this4 = this;
+            var _this5 = this;
 
             this.options.ui.next.addEventListener('click', function () {
-                var newDate = DateManager.addToDate(_this4.options.currentDay, _this4.options.numberOfDays);
-                _this4.options.currentDay = newDate;
-                _this4.build();
-                _this4.options.onPeriodChange.bind(_this4)(newDate, DateManager.addToDate(newDate, _this4.options.numberOfDays));
+                var newDate = DateManager.addToDate(_this5.options.currentDay, _this5.options.numberOfDays);
+                _this5.options.currentDay = newDate;
+                _this5.build();
+                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
             });
 
             this.options.ui.prev.addEventListener('click', function () {
-                var newDate = DateManager.addToDate(_this4.options.currentDay, -_this4.options.numberOfDays);
-                _this4.options.currentDay = newDate;
-                _this4.build();
-                _this4.options.onPeriodChange.bind(_this4)(newDate, DateManager.addToDate(newDate, _this4.options.numberOfDays));
+                var newDate = DateManager.addToDate(_this5.options.currentDay, -_this5.options.numberOfDays);
+                _this5.options.currentDay = newDate;
+                _this5.build();
+                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
             });
 
             this.options.ui.today.addEventListener('click', function () {
                 var newDate = new Date();
-                _this4.options.currentDay = newDate;
-                _this4.build();
-                _this4.options.onPeriodChange.bind(_this4)(newDate, DateManager.addToDate(newDate, _this4.options.numberOfDays));
+                _this5.options.currentDay = newDate;
+                _this5.build();
+                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
             });
         }
     }, {
         key: '_bindEvents',
         value: function _bindEvents() {
-            var _this5 = this;
+            var _this6 = this;
 
             [].forEach.call(document.querySelectorAll('[data-type="event"]'), function (el) {
                 // click on event
-                _this5._attachClickEvent(el);
+                _this6._attachClickEvent(el);
             });
 
             [].forEach.call(document.querySelectorAll('[data-id]'), function (el) {
@@ -309,16 +319,16 @@ var Calendar = function () {
                 el.addEventListener('click', function (event) {
                     event.stopPropagation();
 
-                    switch (_this5.mode.current) {
+                    switch (_this6.mode.current) {
                         case ADD_MODE:
                             var id = event.target.dataset.id.split('#');
-                            if (!_this5.mode.ADD_MODE.dropAllowed) {
+                            if (!_this6.mode.ADD_MODE.dropAllowed) {
                                 alert('Cet emplacement est déjà pris');
                             } else {
                                 // call back method with date and column
                                 var date = new Date(parseInt(id[0]));
-                                _this5.mode.ADD_MODE.callback(date, id[1]);
-                                _this5.resetMode();
+                                _this6.mode.ADD_MODE.callback(date, id[1]);
+                                _this6.resetMode();
                             }
                             break;
                         default:
@@ -328,24 +338,24 @@ var Calendar = function () {
 
                 // mouse down
                 el.addEventListener('mousedown', function (event) {
-                    if (_this5.mode.current == LOCKED_MODE) {
-                        _this5.mode.LOCKED_MODE.start = event.target.dataset.coordinate;
-                        _this5.mode.LOCKED_MODE.mousedown = true;
+                    if (_this6.mode.current == LOCKED_MODE) {
+                        _this6.mode.LOCKED_MODE.start = event.target.dataset.coordinate;
+                        _this6.mode.LOCKED_MODE.mousedown = true;
                     }
                 });
 
                 // mouse up
                 el.addEventListener('mouseup', function (event) {
-                    if (_this5.mode.current == LOCKED_MODE) {
-                        _this5.mode.LOCKED_MODE.end = event.target.dataset.coordinate;
-                        _this5.mode.LOCKED_MODE.mousedown = false;
+                    if (_this6.mode.current == LOCKED_MODE) {
+                        _this6.mode.LOCKED_MODE.end = event.target.dataset.coordinate;
+                        _this6.mode.LOCKED_MODE.mousedown = false;
                     }
                 });
 
                 // hovering a cell
                 el.addEventListener('mouseover', function (event) {
 
-                    switch (_this5.mode.current) {
+                    switch (_this6.mode.current) {
                         case ADD_MODE:
 
                             [].forEach.call(document.querySelectorAll('[data-id]'), function (cell) {
@@ -360,7 +370,7 @@ var Calendar = function () {
                             var cssClass = 'calendar-selection--allowed';
                             var dropAllowed = true;
 
-                            for (var i = 0; i < _this5.mode.ADD_MODE.slotsToTake; i++) {
+                            for (var i = 0; i < _this6.mode.ADD_MODE.slotsToTake; i++) {
                                 var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                                 cells.push(currentCell);
                                 if (currentCell.dataset.type === 'locked' || currentCell.dataset.type === 'event') {
@@ -371,9 +381,9 @@ var Calendar = function () {
                             }
 
                             if (dropAllowed) {
-                                _this5.mode.ADD_MODE.dropAllowed = true;
+                                _this6.mode.ADD_MODE.dropAllowed = true;
                             } else {
-                                _this5.mode.ADD_MODE.dropAllowed = false;
+                                _this6.mode.ADD_MODE.dropAllowed = false;
                             }
 
                             cells.forEach(function (cell) {
@@ -381,11 +391,11 @@ var Calendar = function () {
                             });
                             break;
                         case LOCKED_MODE:
-                            if (_this5.mode.LOCKED_MODE.start !== null) {
-                                var start = _this5.mode.LOCKED_MODE.start.split('#');
+                            if (_this6.mode.LOCKED_MODE.start !== null) {
+                                var start = _this6.mode.LOCKED_MODE.start.split('#');
                                 var current = event.target.dataset.coordinate.split('#');
 
-                                if (current[1] == start[1] && _this5.mode.LOCKED_MODE.mousedown) {
+                                if (current[1] == start[1] && _this6.mode.LOCKED_MODE.mousedown) {
 
                                     var startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
                                     var endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);

@@ -67,33 +67,36 @@
     </div>
     <script src="calendar.js"></script>
     <script>
+    var today = new Date();
+    var tomorow = new Date();
+    tomorow.setDate(today.getDate()+1);
 
     var events = [
         {
             id: 1,
             title: 'Event 1',
-            date: new Date(2017, 7, 11, 10, 0, 0, 0),
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0, 0, 0),
             column: 2,
             duration: 80
         },
         {
             id: 2,
             title: 'Event 2',
-            date: new Date(2017, 7, 12, 9, 0, 0, 0),
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0, 0, 0),
             column: 1,
             duration: 40
         },
         {
             id: 3,
             title: 'Event 3',
-            date: new Date(2017, 7, 12, 14, 0, 0, 0),
-            column: 3,
-            duration: 40
+            date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 12, 0, 0, 0),
+            column: 1,
+            duration: 69
         },
         {
-            id: 3,
+            id: 4,
             title: 'Event 4',
-            date: new Date(2017, 7, 13, 14, 0, 0, 0),
+            date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 10, 0, 0, 0),
             column: 3,
             duration: 120
         }
@@ -101,14 +104,14 @@
 
     var blockedEvents = [
         {
-            start: new Date(2017, 7, 12, 12, 0, 0, 0),
-            end: new Date(2017, 7, 12, 12, 20, 0, 0),
-            column: 1,
+            start: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 10, 0, 0, 0),
+            end: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 16, 0, 0, 0),
+            column: 2,
         },
         {
-            start: new Date(2017, 7, 13, 9, 0, 0, 0),
-            end: new Date(2017, 7, 13, 12, 0, 0, 0),
-            column: 3,
+            start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0, 0),
+            end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 0, 0, 0),
+            column: 2,
         }
     ];
 

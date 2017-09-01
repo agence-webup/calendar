@@ -35,6 +35,9 @@ class Calendar {
                     end: null,
                     column: null
                 }]
+            },
+            EDIT_MODE: {
+                event: null
             }
         }
 
@@ -75,6 +78,7 @@ class Calendar {
 
     addEvent(event) {
         let cell = this.eventDispatcher.addEvent(event);
+        this.events.push(event);
         this._attachClickEvent(cell);
     }
 
@@ -98,10 +102,15 @@ class Calendar {
             case ADD_MODE:
             this.mode.current = ADD_MODE;
             this.uiManager.showFooter('Choisissez une plage horaire libre', () => {
+                // if we were previously in edit mode
+                if(this.mode.EDIT_MODE.event !== null) {
+                    this.addEvent(this.mode.EDIT_MODE.event);
+                }
                 this._switchMode(VIEW_MODE);
             });
             break;
             case EDIT_MODE:
+            this.mode.current = EDIT_MODE;
             break;
             case LOCKED_MODE:
             this.mode.current = LOCKED_MODE;
@@ -152,19 +161,18 @@ class Calendar {
     }
 
     startEditMode(id, callback) {
-        this.removeEvent(id);
-
-        let event = null;
-
         this.events.forEach((el) => {
             if(el.id == id) {
-                event = el;
+                // cache edited event
+                this.mode.EDIT_MODE.event = el;
+
+                // remove event
+                this.removeEvent(id);
+
+                // start edit mode
+                this.startAddEventMode(el.duration, callback);
             }
         });
-
-        if(event) {
-            this.startAddEventMode(event.duration, callback);
-        }
     }
 
     startLockedMode() {
