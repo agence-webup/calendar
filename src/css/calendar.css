@@ -65,10 +65,6 @@
   background-color: #b0bec5;
 }
 
-.calendar-lockedTemp {
-  background-color: #ef9a9a;
-}
-
 .calendar-selection--allowed {
   background-color: #4caf50;
   cursor: pointer;

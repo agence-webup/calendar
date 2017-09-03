@@ -33,14 +33,13 @@ var Calendar = function () {
                 callback: null
             },
             LOCKED_MODE: {
-                mousedown: false,
-                start: null,
-                end: null,
                 stack: [{
                     start: null,
                     end: null,
                     column: null
-                }]
+                }],
+                locking: false,
+                unlocking: false
             },
             EDIT_MODE: {
                 event: null
@@ -212,13 +211,13 @@ var Calendar = function () {
 
                     var lastItem = this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1];
 
-                    if (currentCell.hasAttribute('data-locked-temp') && lastItem.start === null) {
+                    if (currentCell.dataset.type === 'locked' && lastItem.start === null) {
                         lastItem.start = new Date(parseInt(id[0]));
 
                         // retrieve column based on day
                         var coordinates = currentCell.dataset.coordinate.split('#');
                         lastItem.column = coordinates[1] % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : coordinates[1] % this.options.columnsPerDay;
-                    } else if (!currentCell.hasAttribute('data-locked-temp') && lastItem.end === null && lastItem.start !== null) {
+                    } else if (currentCell.dataset.type !== 'locked' && lastItem.end === null && lastItem.start !== null) {
                         lastItem.end = new Date(parseInt(id[0]));
                         this.mode.LOCKED_MODE.stack.push({
                             start: null,
@@ -228,12 +227,6 @@ var Calendar = function () {
                     }
                 }
             }
-
-            [].forEach.call(document.querySelectorAll('[data-locked-temp]'), function (el) {
-                el.classList.add('calendar-locked');
-                el.classList.remove('calendar-lockedTemp');
-                el.removeAttribute('data-locked-temp');
-            });
 
             // TODO: refactoring
             if (this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1].start === null) {
@@ -339,16 +332,25 @@ var Calendar = function () {
                 // mouse down
                 el.addEventListener('mousedown', function (event) {
                     if (_this6.mode.current == LOCKED_MODE) {
-                        _this6.mode.LOCKED_MODE.start = event.target.dataset.coordinate;
-                        _this6.mode.LOCKED_MODE.mousedown = true;
+                        if (event.target.dataset.type === 'locked') {
+                            _this6.mode.LOCKED_MODE.locking = false;
+                            _this6.mode.LOCKED_MODE.unlocking = true;
+                            event.target.classList.remove('calendar-locked');
+                            event.target.removeAttribute('data-type');
+                        } else {
+                            _this6.mode.LOCKED_MODE.locking = true;
+                            _this6.mode.LOCKED_MODE.unlocking = false;
+                            event.target.classList.add('calendar-locked');
+                            event.target.dataset.type = 'locked';
+                        };
                     }
                 });
 
                 // mouse up
                 el.addEventListener('mouseup', function (event) {
                     if (_this6.mode.current == LOCKED_MODE) {
-                        _this6.mode.LOCKED_MODE.end = event.target.dataset.coordinate;
-                        _this6.mode.LOCKED_MODE.mousedown = false;
+                        _this6.mode.LOCKED_MODE.locking = false;
+                        _this6.mode.LOCKED_MODE.unlocking = false;
                     }
                 });
 
@@ -391,25 +393,15 @@ var Calendar = function () {
                             });
                             break;
                         case LOCKED_MODE:
-                            if (_this6.mode.LOCKED_MODE.start !== null) {
-                                var start = _this6.mode.LOCKED_MODE.start.split('#');
-                                var current = event.target.dataset.coordinate.split('#');
-
-                                if (current[1] == start[1] && _this6.mode.LOCKED_MODE.mousedown) {
-
-                                    var startCell = parseInt(start[0]) < parseInt(current[0]) ? parseInt(start[0]) : parseInt(current[0]);
-                                    var endCell = parseInt(current[0]) > parseInt(start[0]) ? parseInt(current[0]) : parseInt(start[0]);
-
-                                    for (var _i = startCell; _i <= endCell; _i++) {
-                                        var cellToLocked = document.querySelector('[data-coordinate="' + _i + '#' + start[1] + '"]');
-                                        if (cellToLocked.dataset.type !== 'event' || cellToLocked.dataset.type !== 'locked') {
-                                            cellToLocked.classList.add('calendar-lockedTemp');
-                                            cellToLocked.dataset.lockedTemp = '';
-                                        }
-                                    }
+                            if (event.target.dataset.type !== 'event') {
+                                if (_this6.mode.LOCKED_MODE.locking) {
+                                    event.target.classList.add('calendar-locked');
+                                    event.target.dataset.type = 'locked';
+                                } else if (_this6.mode.LOCKED_MODE.unlocking) {
+                                    event.target.classList.remove('calendar-locked');
+                                    event.target.removeAttribute('data-type');
                                 }
                             }
-
                         default:
 
                     }
