@@ -28,9 +28,8 @@
   background-color: transparent;
 }
 
-.calendar tr:hover,
-.calendar th:active {
-  background-color: #eceff1;
+.calendar tbody tr:hover {
+    background-color: #eceff1;
 }
 
 .calendar td {
@@ -50,6 +49,21 @@
 
 [data-mode="locked"] .calendar-bulk {
   display: table-cell;
+}
+
+.calendar-bulk button {
+  margin: 0;
+  padding: 0 2rem;
+  outline: none;
+  background-color: transparent;
+}
+
+.calendar-bulk button svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  pointer-events: none;
+
+  fill: #212121;
 }
 
 /* event

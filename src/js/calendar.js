@@ -100,7 +100,7 @@ class Calendar {
         switch (mode) {
             case ADD_MODE:
                 this.mode.current = ADD_MODE;
-                this.uiManager.showFooter('Choisissez une plage horaire libre', () => {
+                this.uiManager.showFooter('Choisissez une plage horaire libre', 'Annuler', () => {
                     // if we were previously in edit mode
                     if (this.mode.EDIT_MODE.event !== null) {
                         this.addEvent(this.mode.EDIT_MODE.event);
@@ -115,8 +115,8 @@ class Calendar {
                 this.mode.current = LOCKED_MODE;
                 this.target.dataset.mode = LOCKED_MODE;
 
-                this.uiManager.showFooter('Choisissez les plages horaires à bloquer', () => {
-                    this.resetMode();
+                this.uiManager.showFooter('Choisissez les plages horaires à bloquer', 'Valider', () => {
+                    this.commitLocked();
                 });
 
                 break;
@@ -178,7 +178,7 @@ class Calendar {
         this._switchMode(LOCKED_MODE);
     };
 
-    commitLocked(callback) {
+    commitLocked() {
         let colNumber = this.options.numberOfDays * this.options.columnsPerDay;
         let lineNumber = this.dateManager.hours.length;
         let samePeriod = false;
@@ -186,6 +186,7 @@ class Calendar {
             for (let j = 1; j <= lineNumber; j++) {
                 let currentCell = document.querySelector('[data-coordinate="' + j + '#' + i + '"]');
                 let id = currentCell.dataset.id.split('#');
+                let coordinate = currentCell.dataset.coordinate.split('#');
 
                 let lastItem = this.mode.LOCKED_MODE.stack[this.mode.LOCKED_MODE.stack.length - 1];
 
@@ -197,7 +198,7 @@ class Calendar {
                     lastItem.column = coordinates[1] % this.options.columnsPerDay == 0 ? this.options.columnsPerDay :
                         coordinates[1] % this.options.columnsPerDay;
                 } else if (currentCell.dataset.type !== 'locked' && lastItem.end === null && lastItem.start !==
-                    null) {
+                    null || currentCell.dataset.type === 'locked' && parseInt(coordinate[0]) === this.dateManager.hours.length) {
                     lastItem.end = new Date(parseInt(id[0]));
                     this.mode.LOCKED_MODE.stack.push({
                         start: null,
@@ -213,7 +214,7 @@ class Calendar {
             this.mode.LOCKED_MODE.stack.splice(-1, 1);
         }
 
-        callback(this.mode.LOCKED_MODE.stack);
+        this.options.onCommitLocked(this.mode.LOCKED_MODE.stack);
 
         this.mode.LOCKED_MODE.stack = [{
             start: null,
@@ -271,7 +272,43 @@ class Calendar {
         });
     }
 
+    bulk(event) {
+        if(!event.target.dataset.bulk) return;
+
+        if(event.target.dataset.bulk === 'locked') {
+            for(let i = 1; i <= this.dateManager.hours.length; i++) {
+                let cell = document.querySelector('[data-coordinate="' + i + '#' + event.target.dataset.col + '"]');
+                if(cell.dataset.type !== 'event') {
+                    cell.classList.add('calendar-locked');
+                    cell.dataset.type = 'locked';
+                }
+            }
+            event.target.innerHTML = UIManager.getIcon('unlocked');
+            event.target.dataset.bulk = 'unlocked';
+
+        } else {
+            for(let i = 1; i <= this.dateManager.hours.length; i++) {
+                let cell = document.querySelector('[data-coordinate="' + i + '#' + event.target.dataset.col + '"]');
+                console.log('[data-coordinate="' + i + '#' + event.target.dataset.col + '"]');
+                console.log(cell);
+                if(cell.dataset.type !== 'event') {
+                    cell.classList.remove('calendar-locked');
+                    cell.removeAttribute('data-type');
+                }
+            }
+            event.target.innerHTML = UIManager.getIcon('locked');
+            event.target.dataset.bulk = 'locked';
+        }
+
+
+    }
+
     _bindEvents() {
+
+        // bulk actions
+        [].forEach.call(document.querySelectorAll('[data-bulk]'), (el) => {
+            el.addEventListener('click', this.bulk.bind(this));
+        });
 
         [].forEach.call(document.querySelectorAll('[data-type="event"]'), (el) => {
             // click on event

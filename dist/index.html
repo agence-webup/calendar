@@ -60,7 +60,6 @@
             <button id="add">Add task</button>
             <button id="edit">Edit task 1</button>
             <button id="block">Blocked mode</button>
-            <button id="commit">Commit blocked cell</button>
             <button id="reset">Reset</button>
         </div>
         <div id="calendar"></div>
@@ -134,6 +133,9 @@
         onPeriodChange: function(start, end) {
             //console.log(start + ' ->', end);
             this.loadEvents(events, blockedEvents);
+        },
+        onCommitLocked: function(periods) {
+            console.log(periods);
         }
     });
 
@@ -164,13 +166,6 @@
 
     document.querySelector('#reset').addEventListener('click', () => {
         calendar.resetMode();
-    });
-
-
-    document.querySelector('#commit').addEventListener('click', () => {
-        calendar.commitLocked((periods) => {
-            console.log(periods);
-        });
     });
 
     </script>
