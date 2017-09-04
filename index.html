@@ -60,38 +60,42 @@
             <button id="add">Add task</button>
             <button id="edit">Edit task 1</button>
             <button id="block">Blocked mode</button>
+            <button id="reset">Reset</button>
         </div>
         <div id="calendar"></div>
     </div>
     <script src="calendar.js"></script>
     <script>
+    var today = new Date();
+    var tomorow = new Date();
+    tomorow.setDate(today.getDate()+1);
 
     var events = [
         {
             id: 1,
             title: 'Event 1',
-            date: new Date(2017, 6, 18, 10, 0, 0, 0),
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0, 0, 0),
             column: 2,
             duration: 80
         },
         {
             id: 2,
             title: 'Event 2',
-            date: new Date(2017, 6, 18, 9, 0, 0, 0),
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0, 0, 0),
             column: 1,
             duration: 40
         },
         {
             id: 3,
             title: 'Event 3',
-            date: new Date(2017, 6, 18, 14, 0, 0, 0),
-            column: 3,
-            duration: 40
+            date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 12, 0, 0, 0),
+            column: 1,
+            duration: 69
         },
         {
-            id: 3,
+            id: 4,
             title: 'Event 4',
-            date: new Date(2017, 6, 20, 14, 0, 0, 0),
+            date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 10, 0, 0, 0),
             column: 3,
             duration: 120
         }
@@ -99,14 +103,14 @@
 
     var blockedEvents = [
         {
-            start: new Date(2017, 6, 19, 12, 0, 0, 0),
-            end: new Date(2017, 6, 19, 14, 0, 0, 0),
-            column: 1,
+            start: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 10, 0, 0, 0),
+            end: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 16, 0, 0, 0),
+            column: 2,
         },
         {
-            start: new Date(2017, 6, 19, 8, 0, 0, 0),
-            end: new Date(2017, 6, 19, 14, 0, 0, 0),
-            column: 3,
+            start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0, 0),
+            end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 0, 0, 0),
+            column: 2,
         }
     ];
 
@@ -114,8 +118,8 @@
         currentDay: new Date(),
         numberOfDays: 3,
         columnsPerDay: 3,
-        dayStartHour: '08:00',
-        dayEndHour: '18:00',
+        dayStartHour: '09:00',
+        dayEndHour: '16:00',
         slotDuration: 20,
         cssClass: 'calendar',
         ui: {
@@ -126,29 +130,27 @@
         onEventClicked: function(eventId) {
             alert('Event clicked: ' + eventId);
         },
-        onLocked: function(start, end, callback) {
-            console.log(start + '->' + end);
-            setTimeout(() => {
-                // commit event
-                callback(null, {
-                    start: new Date(2017, 6, 11, 12, 0, 0, 0),
-                    end: new Date(2017, 6, 11, 14, 0, 0, 0),
-                    column: 1,
-                });
-            }, 1000);
-        },
         onPeriodChange: function(start, end) {
-            console.log(this);
-            console.log(start + ' ->', end);
+            //console.log(start + ' ->', end);
             this.loadEvents(events, blockedEvents);
+        },
+        onCommitLocked: function(periods) {
+            console.log(periods);
         }
     });
 
     calendar.loadEvents(events, blockedEvents);
 
     document.querySelector('#add').addEventListener('click', () => {
-        calendar.startAddEventMode(60, (timestamp, column) => {
-            alert('Drop on column ' + column + ' at ' + timestamp);
+        calendar.startAddEventMode(60, (date, column) => {
+            calendar.addEvent({
+                id: 4,
+                title: 'Event added',
+                date: date,
+                column: column,
+                duration: 60
+            });
+            alert('Drop on column ' + column + ' at ' + date);
         });
     });
 
@@ -162,6 +164,9 @@
         calendar.startLockedMode();
     });
 
+    document.querySelector('#reset').addEventListener('click', () => {
+        calendar.resetMode();
+    });
 
     </script>
 </body>
