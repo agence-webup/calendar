@@ -342,17 +342,19 @@ class Calendar {
             // mouse down
             el.addEventListener('mousedown', (event) => {
                 if (this.mode.current == LOCKED_MODE) {
-                    if (event.target.dataset.type === 'locked') {
-                        this.mode.LOCKED_MODE.locking = false;
-                        this.mode.LOCKED_MODE.unlocking = true;
-                        event.target.classList.remove('calendar-locked');
-                        event.target.removeAttribute('data-type');
-                    } else {
-                        this.mode.LOCKED_MODE.locking = true;
-                        this.mode.LOCKED_MODE.unlocking = false;
-                        event.target.classList.add('calendar-locked');
-                        event.target.dataset.type = 'locked';
-                    };
+                    if(event.target.dataset.type !== 'event') {
+                        if (event.target.dataset.type === 'locked') {
+                            this.mode.LOCKED_MODE.locking = false;
+                            this.mode.LOCKED_MODE.unlocking = true;
+                            event.target.classList.remove('calendar-locked');
+                            event.target.removeAttribute('data-type');
+                        } else {
+                            this.mode.LOCKED_MODE.locking = true;
+                            this.mode.LOCKED_MODE.unlocking = false;
+                            event.target.classList.add('calendar-locked');
+                            event.target.dataset.type = 'locked';
+                        };
+                    }
                 }
             });
 

@@ -367,17 +367,19 @@ var Calendar = function () {
                 // mouse down
                 el.addEventListener('mousedown', function (event) {
                     if (_this6.mode.current == LOCKED_MODE) {
-                        if (event.target.dataset.type === 'locked') {
-                            _this6.mode.LOCKED_MODE.locking = false;
-                            _this6.mode.LOCKED_MODE.unlocking = true;
-                            event.target.classList.remove('calendar-locked');
-                            event.target.removeAttribute('data-type');
-                        } else {
-                            _this6.mode.LOCKED_MODE.locking = true;
-                            _this6.mode.LOCKED_MODE.unlocking = false;
-                            event.target.classList.add('calendar-locked');
-                            event.target.dataset.type = 'locked';
-                        };
+                        if (event.target.dataset.type !== 'event') {
+                            if (event.target.dataset.type === 'locked') {
+                                _this6.mode.LOCKED_MODE.locking = false;
+                                _this6.mode.LOCKED_MODE.unlocking = true;
+                                event.target.classList.remove('calendar-locked');
+                                event.target.removeAttribute('data-type');
+                            } else {
+                                _this6.mode.LOCKED_MODE.locking = true;
+                                _this6.mode.LOCKED_MODE.unlocking = false;
+                                event.target.classList.add('calendar-locked');
+                                event.target.dataset.type = 'locked';
+                            };
+                        }
                     }
                 });
 
