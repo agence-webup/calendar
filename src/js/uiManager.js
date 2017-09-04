@@ -5,7 +5,7 @@ class UIManager {
         this.options = options;
         this.events = events;
         this.dateManager = dateManager;
-
+        this.currentFooterCallback = null;
         this.ui = {
             footer: this._buildFooter()
         }
@@ -15,7 +15,24 @@ class UIManager {
         }
     }
 
+    clean() {
+        // clean footer
+        let footer = document.querySelector('.calendar-mode');
+
+        if(footer) {
+            footer.parentNode.removeChild(footer);
+        }
+
+        // clean table
+        if(this.target.querySelector('table')) {
+            this.target.removeChild(this.target.querySelector('table'));
+        }
+        this.target.innerHTML = '';
+    }
     build() {
+
+        this.clean();
+
         let table = this._buildTable();
         let dayLabels = this._buildDayLabel();
         let header = this._buildHeader();
@@ -27,36 +44,24 @@ class UIManager {
         let bulkActions = this._buildBulkActions();
         header.appendChild(bulkActions);
 
-
         table.appendChild(header);
         table.appendChild(body);
 
-        //this.target.removeChild();
-        if(this.target.querySelector('table')) {
-            this.target.removeChild(this.target.querySelector('table'));
-        }
-
-        this.target.innerHTML = '';
         this.target.appendChild(table);
 
         // append footer
         document.body.append(this.ui.footer.wrapper);
     }
 
-
-
     showFooter(text, btnText = 'annuler', callback) {
+        this.currentFooterCallback = callback;
+
         this.ui.footer.message.innerHTML = text;
         setTimeout(() => {
             this.ui.footer.wrapper.classList.add('calendar-mode--active');
         }, 10);
 
         this.ui.footer.btn.innerText = btnText;
-
-        this.ui.footer.btn.addEventListener('click', (event) => {
-            callback();
-            this.hideFooter();
-        });
     }
 
     hideFooter() {

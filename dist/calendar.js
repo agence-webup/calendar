@@ -69,6 +69,12 @@ var Calendar = function () {
             this.uiManager.build();
         }
     }, {
+        key: 'reset',
+        value: function reset() {
+            this.build();
+            this.loadEvents(this.events, this.blockedEvents);
+        }
+    }, {
         key: 'loadEvents',
         value: function loadEvents(events, blockedEvents) {
             this.events = events;
@@ -234,6 +240,7 @@ var Calendar = function () {
                 this.mode.LOCKED_MODE.stack.splice(-1, 1);
             }
 
+            // callback
             this.options.onCommitLocked(this.mode.LOCKED_MODE.stack);
 
             this.mode.LOCKED_MODE.stack = [{
@@ -330,6 +337,12 @@ var Calendar = function () {
         key: '_bindEvents',
         value: function _bindEvents() {
             var _this6 = this;
+
+            // footer
+            this.uiManager.ui.footer.btn.addEventListener('click', function (event) {
+                _this6.uiManager.currentFooterCallback();
+                _this6.uiManager.hideFooter();
+            });
 
             // bulk actions
             [].forEach.call(document.querySelectorAll('[data-bulk]'), function (el) {
@@ -782,7 +795,7 @@ var UIManager = function () {
         this.options = options;
         this.events = events;
         this.dateManager = dateManager;
-
+        this.currentFooterCallback = null;
         this.ui = {
             footer: this._buildFooter()
         };
@@ -793,8 +806,27 @@ var UIManager = function () {
     }
 
     _createClass(UIManager, [{
+        key: 'clean',
+        value: function clean() {
+            // clean footer
+            var footer = document.querySelector('.calendar-mode');
+
+            if (footer) {
+                footer.parentNode.removeChild(footer);
+            }
+
+            // clean table
+            if (this.target.querySelector('table')) {
+                this.target.removeChild(this.target.querySelector('table'));
+            }
+            this.target.innerHTML = '';
+        }
+    }, {
         key: 'build',
         value: function build() {
+
+            this.clean();
+
             var table = this._buildTable();
             var dayLabels = this._buildDayLabel();
             var header = this._buildHeader();
@@ -809,12 +841,6 @@ var UIManager = function () {
             table.appendChild(header);
             table.appendChild(body);
 
-            //this.target.removeChild();
-            if (this.target.querySelector('table')) {
-                this.target.removeChild(this.target.querySelector('table'));
-            }
-
-            this.target.innerHTML = '';
             this.target.appendChild(table);
 
             // append footer
@@ -828,17 +854,14 @@ var UIManager = function () {
             var btnText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'annuler';
             var callback = arguments[2];
 
+            this.currentFooterCallback = callback;
+
             this.ui.footer.message.innerHTML = text;
             setTimeout(function () {
                 _this.ui.footer.wrapper.classList.add('calendar-mode--active');
             }, 10);
 
             this.ui.footer.btn.innerText = btnText;
-
-            this.ui.footer.btn.addEventListener('click', function (event) {
-                callback();
-                _this.hideFooter();
-            });
         }
     }, {
         key: 'hideFooter',

@@ -60,6 +60,11 @@ class Calendar {
         this.uiManager.build();
     }
 
+    reset() {
+        this.build();
+        this.loadEvents(this.events, this.blockedEvents);
+    }
+
     loadEvents(events, blockedEvents) {
         this.events = events;
         this.blockedEvents = blockedEvents;
@@ -214,6 +219,7 @@ class Calendar {
             this.mode.LOCKED_MODE.stack.splice(-1, 1);
         }
 
+        // callback
         this.options.onCommitLocked(this.mode.LOCKED_MODE.stack);
 
         this.mode.LOCKED_MODE.stack = [{
@@ -304,6 +310,12 @@ class Calendar {
     }
 
     _bindEvents() {
+
+        // footer
+        this.uiManager.ui.footer.btn.addEventListener('click', (event) => {
+            this.uiManager.currentFooterCallback();
+            this.uiManager.hideFooter();
+        });
 
         // bulk actions
         [].forEach.call(document.querySelectorAll('[data-bulk]'), (el) => {

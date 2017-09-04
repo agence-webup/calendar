@@ -1,4 +1,8 @@
 
+.calendar * {
+  user-select: none;
+}
+
 .calendar {
   width: 100%;
   border: .1rem solid #cbcbcb;
