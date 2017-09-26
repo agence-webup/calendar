@@ -127,8 +127,9 @@
             prev: document.querySelector('#prev'),
             today: document.querySelector('#today'),
         },
-        onEventClicked: function(eventId) {
-            alert('Event clicked: ' + eventId);
+        onEventClicked: function(event) {
+            alert(event.id);
+            console.log(event)
         },
         onPeriodChange: function(start, end) {
             //console.log(start + ' ->', end);

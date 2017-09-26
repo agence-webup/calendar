@@ -274,7 +274,11 @@ var Calendar = function () {
             el.addEventListener('click', function (event) {
                 event.stopPropagation();
                 if (_this4.mode.current == VIEW_MODE) {
-                    _this4.options.onEventClicked(event.target.dataset.eventId);
+                    _this4.events.forEach(function (e) {
+                        if (e.id == event.target.dataset.eventId) {
+                            _this4.options.onEventClicked(e);
+                        }
+                    });
                 }
             });
         }

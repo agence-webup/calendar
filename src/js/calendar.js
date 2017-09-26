@@ -250,7 +250,11 @@ class Calendar {
         el.addEventListener('click', (event) => {
             event.stopPropagation();
             if (this.mode.current == VIEW_MODE) {
-                this.options.onEventClicked(event.target.dataset.eventId);
+                this.events.forEach((e) => {
+                    if(e.id == event.target.dataset.eventId) {
+                        this.options.onEventClicked(e);
+                    }
+                });
             }
         });
     }
