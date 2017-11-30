@@ -37,10 +37,11 @@ class LockedEventDispatcher {
             for(let i = 0; i < slotsToTake; i++) {
                 // TODO: use caching
                 let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
-                currentCell.classList.add('calendar-locked');
-                currentCell.dataset.type = 'locked';
+                if(currentCell) {
+                    currentCell.classList.add('calendar-locked');
+                    currentCell.dataset.type = 'locked';
+                }
                 currentRow++;
-
             }
         }
     }

@@ -1,4 +1,3 @@
-
 .calendar * {
   user-select: none;
 }
@@ -46,6 +45,10 @@
 
 .calendar th::selection{
   background: transparent;
+}
+
+.calendar tr:last-of-type {
+  display: none;
 }
 
 /* bulk

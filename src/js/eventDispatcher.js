@@ -44,8 +44,10 @@ class EventDispatcher {
                 // TODO: use caching
                 let currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                 //currentCell.style['background-color'] = 'red';
-                currentCell.dataset.originId = event.id;
-                currentCell.style.display = 'none';
+                if(currentCell) {
+                    currentCell.dataset.originId = event.id;
+                    currentCell.style.display = 'none';
+                }
             }
         }
         cell.rowSpan = slotsToTake;
