@@ -287,26 +287,32 @@ var Calendar = function () {
         value: function _bindControlls() {
             var _this5 = this;
 
-            this.options.ui.next.addEventListener('click', function () {
-                var newDate = DateManager.addToDate(_this5.options.currentDay, _this5.options.numberOfDays);
-                _this5.options.currentDay = newDate;
-                _this5.build();
-                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
-            });
+            if (this.options.ui.next) {
+                this.options.ui.next.addEventListener('click', function () {
+                    var newDate = DateManager.addToDate(_this5.options.currentDay, _this5.options.numberOfDays);
+                    _this5.options.currentDay = newDate;
+                    _this5.build();
+                    _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
+                });
+            }
 
-            this.options.ui.prev.addEventListener('click', function () {
-                var newDate = DateManager.addToDate(_this5.options.currentDay, -_this5.options.numberOfDays);
-                _this5.options.currentDay = newDate;
-                _this5.build();
-                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
-            });
+            if (this.options.ui.prev) {
+                this.options.ui.prev.addEventListener('click', function () {
+                    var newDate = DateManager.addToDate(_this5.options.currentDay, -_this5.options.numberOfDays);
+                    _this5.options.currentDay = newDate;
+                    _this5.build();
+                    _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
+                });
+            }
 
-            this.options.ui.today.addEventListener('click', function () {
-                var newDate = new Date();
-                _this5.options.currentDay = newDate;
-                _this5.build();
-                _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
-            });
+            if (this.options.ui.today) {
+                this.options.ui.today.addEventListener('click', function () {
+                    var newDate = new Date();
+                    _this5.options.currentDay = newDate;
+                    _this5.build();
+                    _this5.options.onPeriodChange.bind(_this5)(newDate, DateManager.addToDate(newDate, _this5.options.numberOfDays));
+                });
+            }
         }
     }, {
         key: 'bulk',

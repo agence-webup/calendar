@@ -104,39 +104,39 @@ class Calendar {
     _switchMode(mode) {
         switch (mode) {
             case ADD_MODE:
-                this.mode.current = ADD_MODE;
-                this.uiManager.showFooter('Choisissez une plage horaire libre', 'Annuler', () => {
-                    // if we were previously in edit mode
-                    if (this.mode.EDIT_MODE.event !== null) {
-                        this.addEvent(this.mode.EDIT_MODE.event);
-                    }
-                    this._switchMode(VIEW_MODE);
-                });
-                break;
+            this.mode.current = ADD_MODE;
+            this.uiManager.showFooter('Choisissez une plage horaire libre', 'Annuler', () => {
+                // if we were previously in edit mode
+                if (this.mode.EDIT_MODE.event !== null) {
+                    this.addEvent(this.mode.EDIT_MODE.event);
+                }
+                this._switchMode(VIEW_MODE);
+            });
+            break;
             case EDIT_MODE:
-                this.mode.current = EDIT_MODE;
-                break;
+            this.mode.current = EDIT_MODE;
+            break;
             case LOCKED_MODE:
-                this.mode.current = LOCKED_MODE;
-                this.target.dataset.mode = LOCKED_MODE;
+            this.mode.current = LOCKED_MODE;
+            this.target.dataset.mode = LOCKED_MODE;
 
-                this.uiManager.showFooter('Choisissez les plages horaires à bloquer', 'Valider', () => {
-                    this.commitLocked();
-                });
+            this.uiManager.showFooter('Choisissez les plages horaires à bloquer', 'Valider', () => {
+                this.commitLocked();
+            });
 
-                break;
+            break;
             case VIEW_MODE:
-                this.target.dataset.mode = VIEW_MODE;
-                this.mode.current = VIEW_MODE;
+            this.target.dataset.mode = VIEW_MODE;
+            this.mode.current = VIEW_MODE;
 
-                // clean add mode
-                [].forEach.call(document.querySelectorAll('[data-id]'), function(cell) {
-                    cell.classList.remove('calendar-selection--allowed');
-                    cell.classList.remove('calendar-selection--forbidden');
-                });
+            // clean add mode
+            [].forEach.call(document.querySelectorAll('[data-id]'), function(cell) {
+                cell.classList.remove('calendar-selection--allowed');
+                cell.classList.remove('calendar-selection--forbidden');
+            });
 
-                console.log('Entering view mode');
-                break;
+            console.log('Entering view mode');
+            break;
             default:
 
         }
@@ -146,18 +146,18 @@ class Calendar {
     resetMode() {
         switch (this.mode.current) {
             case ADD_MODE:
-                this.mode.ADD_MODE = {
-                    dropAllowed: null,
-                    slotsToTake: null,
-                    callback: null
-                }
-                break;
+            this.mode.ADD_MODE = {
+                dropAllowed: null,
+                slotsToTake: null,
+                callback: null
+            }
+            break;
             case LOCKED_MODE:
-                [].forEach.call(document.querySelectorAll('[data-locked-temp]'), function(cell) {
-                    cell.classList.remove('calendar-lockedTemp');
-                    cell.removeAttribute('data-locked-temp');
-                });
-                break;
+            [].forEach.call(document.querySelectorAll('[data-locked-temp]'), function(cell) {
+                cell.classList.remove('calendar-lockedTemp');
+                cell.removeAttribute('data-locked-temp');
+            });
+            break;
         }
 
         this.uiManager.hideFooter();
@@ -201,9 +201,9 @@ class Calendar {
                     // retrieve column based on day
                     let coordinates = currentCell.dataset.coordinate.split('#');
                     lastItem.column = coordinates[1] % this.options.columnsPerDay == 0 ? this.options.columnsPerDay :
-                        coordinates[1] % this.options.columnsPerDay;
+                    coordinates[1] % this.options.columnsPerDay;
                 } else if (currentCell.dataset.type !== 'locked' && lastItem.end === null && lastItem.start !==
-                    null || currentCell.dataset.type === 'locked' && parseInt(coordinate[0]) === this.dateManager.hours.length) {
+                null || currentCell.dataset.type === 'locked' && parseInt(coordinate[0]) === this.dateManager.hours.length) {
                     lastItem.end = new Date(parseInt(id[0]));
                     this.mode.LOCKED_MODE.stack.push({
                         start: null,
@@ -260,26 +260,32 @@ class Calendar {
     }
 
     _bindControlls() {
-        this.options.ui.next.addEventListener('click', () => {
-            let newDate = DateManager.addToDate(this.options.currentDay, this.options.numberOfDays);
-            this.options.currentDay = newDate;
-            this.build();
-            this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
-        });
+        if(this.options.ui.next) {
+            this.options.ui.next.addEventListener('click', () => {
+                let newDate = DateManager.addToDate(this.options.currentDay, this.options.numberOfDays);
+                this.options.currentDay = newDate;
+                this.build();
+                this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
+            });
+        }
 
-        this.options.ui.prev.addEventListener('click', () => {
-            let newDate = DateManager.addToDate(this.options.currentDay, -this.options.numberOfDays);
-            this.options.currentDay = newDate;
-            this.build();
-            this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
-        });
+        if(this.options.ui.prev) {
+            this.options.ui.prev.addEventListener('click', () => {
+                let newDate = DateManager.addToDate(this.options.currentDay, -this.options.numberOfDays);
+                this.options.currentDay = newDate;
+                this.build();
+                this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
+            });
+        }
 
-        this.options.ui.today.addEventListener('click', () => {
-            let newDate = new Date();
-            this.options.currentDay = newDate;
-            this.build();
-            this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
-        });
+        if(this.options.ui.today) {
+            this.options.ui.today.addEventListener('click', () => {
+                let newDate = new Date();
+                this.options.currentDay = newDate;
+                this.build();
+                this.options.onPeriodChange.bind(this)(newDate, DateManager.addToDate(newDate, this.options.numberOfDays));
+            });
+        }
     }
 
     bulk(event) {
@@ -340,16 +346,16 @@ class Calendar {
 
                 switch (this.mode.current) {
                     case ADD_MODE:
-                        let id = event.target.dataset.id.split('#');
-                        if (!this.mode.ADD_MODE.dropAllowed) {
-                            alert('Cet emplacement est déjà pris');
-                        } else {
-                            // call back method with date and column
-                            let date = new Date(parseInt(id[0]));
-                            this.mode.ADD_MODE.callback(date, id[1]);
-                            this.resetMode();
-                        }
-                        break;
+                    let id = event.target.dataset.id.split('#');
+                    if (!this.mode.ADD_MODE.dropAllowed) {
+                        alert('Cet emplacement est déjà pris');
+                    } else {
+                        // call back method with date and column
+                        let date = new Date(parseInt(id[0]));
+                        this.mode.ADD_MODE.callback(date, id[1]);
+                        this.resetMode();
+                    }
+                    break;
                     default:
 
                 }
@@ -388,50 +394,50 @@ class Calendar {
                 switch (this.mode.current) {
                     case ADD_MODE:
 
-                        [].forEach.call(document.querySelectorAll('[data-id]'), function(cell) {
-                            cell.classList.remove('calendar-selection--allowed');
-                            cell.classList.remove('calendar-selection--forbidden');
-                        });
+                    [].forEach.call(document.querySelectorAll('[data-id]'), function(cell) {
+                        cell.classList.remove('calendar-selection--allowed');
+                        cell.classList.remove('calendar-selection--forbidden');
+                    });
 
-                        let cellAdress = event.target.dataset.coordinate.split('#');
-                        let currentRow = cellAdress[0];
-                        let cells = [];
+                    let cellAdress = event.target.dataset.coordinate.split('#');
+                    let currentRow = cellAdress[0];
+                    let cells = [];
 
-                        let cssClass = 'calendar-selection--allowed';
-                        let dropAllowed = true;
+                    let cssClass = 'calendar-selection--allowed';
+                    let dropAllowed = true;
 
-                        for (let i = 0; i < this.mode.ADD_MODE.slotsToTake; i++) {
-                            let currentCell = document.querySelector('[data-coordinate="' +
-                                currentRow + '#' + cellAdress[1] + '"]');
-                            cells.push(currentCell);
-                            if (currentCell.dataset.type === 'locked' || currentCell.dataset.type ===
-                                'event') {
-                                cssClass = 'calendar-selection--forbidden';
-                                dropAllowed = false;
-                            }
-                            currentRow++;
+                    for (let i = 0; i < this.mode.ADD_MODE.slotsToTake; i++) {
+                        let currentCell = document.querySelector('[data-coordinate="' +
+                        currentRow + '#' + cellAdress[1] + '"]');
+                        cells.push(currentCell);
+                        if (currentCell.dataset.type === 'locked' || currentCell.dataset.type ===
+                        'event') {
+                            cssClass = 'calendar-selection--forbidden';
+                            dropAllowed = false;
                         }
+                        currentRow++;
+                    }
 
-                        if (dropAllowed) {
-                            this.mode.ADD_MODE.dropAllowed = true;
-                        } else {
-                            this.mode.ADD_MODE.dropAllowed = false;
-                        }
+                    if (dropAllowed) {
+                        this.mode.ADD_MODE.dropAllowed = true;
+                    } else {
+                        this.mode.ADD_MODE.dropAllowed = false;
+                    }
 
-                        cells.forEach((cell) => {
-                            cell.classList.add(cssClass);
-                        })
-                        break;
+                    cells.forEach((cell) => {
+                        cell.classList.add(cssClass);
+                    })
+                    break;
                     case LOCKED_MODE:
-                        if (event.target.dataset.type !== 'event') {
-                            if (this.mode.LOCKED_MODE.locking) {
-                                event.target.classList.add('calendar-locked');
-                                event.target.dataset.type = 'locked';
-                            } else if (this.mode.LOCKED_MODE.unlocking) {
-                                event.target.classList.remove('calendar-locked');
-                                event.target.removeAttribute('data-type');
-                            }
+                    if (event.target.dataset.type !== 'event') {
+                        if (this.mode.LOCKED_MODE.locking) {
+                            event.target.classList.add('calendar-locked');
+                            event.target.dataset.type = 'locked';
+                        } else if (this.mode.LOCKED_MODE.unlocking) {
+                            event.target.classList.remove('calendar-locked');
+                            event.target.removeAttribute('data-type');
                         }
+                    }
                     default:
 
                 }
