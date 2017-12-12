@@ -315,6 +315,13 @@ var Calendar = function () {
             }
         }
     }, {
+        key: 'goToDate',
+        value: function goToDate(date) {
+            this.options.currentDay = date;
+            this.build();
+            this.options.onPeriodChange.bind(this)(date, DateManager.addToDate(date, this.options.numberOfDays));
+        }
+    }, {
         key: 'bulk',
         value: function bulk(event) {
             if (!event.target.dataset.bulk) return;

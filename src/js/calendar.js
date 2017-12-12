@@ -288,6 +288,12 @@ class Calendar {
         }
     }
 
+    goToDate(date) {
+        this.options.currentDay = date;
+        this.build();
+        this.options.onPeriodChange.bind(this)(date, DateManager.addToDate(date, this.options.numberOfDays));
+    }
+
     bulk(event) {
         if(!event.target.dataset.bulk) return;
 
