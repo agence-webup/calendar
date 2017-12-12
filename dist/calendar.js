@@ -617,6 +617,17 @@ var DateManager = function () {
             return this.days[index - 1].toLocaleDateString();
         }
     }, {
+        key: 'getDayName',
+        value: function getDayName(index) {
+            return this.numberToDay(this.days[index - 1].getDay());
+        }
+    }, {
+        key: 'numberToDay',
+        value: function numberToDay(number) {
+            var frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'vendredi', 'samedi'];
+            return frDays[number];
+        }
+    }, {
         key: 'getHoursLabel',
         value: function getHoursLabel(index) {
             return this.formatLeadingZero(this.hours[index].getHours()) + ':' + this.formatLeadingZero(this.hours[index].getMinutes());
@@ -906,7 +917,8 @@ var UIManager = function () {
                     firstIteration = false;
                     th.innerHTML = 'Heure';
                 } else {
-                    th.innerHTML = this.dateManager.getDayLabel(i);
+                    th.innerHTML = this.dateManager.getDayName(i) + '<br>' + this.dateManager.getDayLabel(i);
+
                     th.colSpan = this.options.columnsPerDay;
                 }
                 daysLine.appendChild(th);

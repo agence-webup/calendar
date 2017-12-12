@@ -69,6 +69,16 @@ class DateManager {
         return this.days[index - 1].toLocaleDateString();
     }
 
+    getDayName(index) {
+        return this.numberToDay(this.days[index - 1].getDay());
+    }
+
+    numberToDay(number) {
+        let frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'vendredi', 'samedi'];
+        return frDays[number];
+
+    }
+
     getHoursLabel(index) {
         return this.formatLeadingZero(this.hours[index].getHours()) + ':' + this.formatLeadingZero(this.hours[index].getMinutes());
     }
@@ -76,7 +86,6 @@ class DateManager {
     formatLeadingZero(value) {
         return ('0' + value).slice(-2);
     }
-
 
     static addToDate(date, days = 0, hours = 0, minutes = 0, seconds = 0) {
         var returnDate = new Date(

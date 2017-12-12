@@ -88,7 +88,8 @@ class UIManager {
                 firstIteration = false;
                 th.innerHTML = 'Heure';
             } else {
-                th.innerHTML = this.dateManager.getDayLabel(i);
+                th.innerHTML = this.dateManager.getDayName(i) + '<br>' + this.dateManager.getDayLabel(i);
+
                 th.colSpan = this.options.columnsPerDay;
             }
             daysLine.appendChild(th);
