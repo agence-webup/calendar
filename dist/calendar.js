@@ -624,7 +624,7 @@ var DateManager = function () {
     }, {
         key: 'numberToDay',
         value: function numberToDay(number) {
-            var frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'vendredi', 'samedi'];
+            var frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
             return frDays[number];
         }
     }, {

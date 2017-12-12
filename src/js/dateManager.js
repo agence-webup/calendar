@@ -74,7 +74,7 @@ class DateManager {
     }
 
     numberToDay(number) {
-        let frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'vendredi', 'samedi'];
+        let frDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
         return frDays[number];
 
     }
