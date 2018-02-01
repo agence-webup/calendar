@@ -1,5 +1,5 @@
 {
-  "name": "calendar.js",
+  "name": "thwomp.js",
   "version": "0.0.1",
   "description": "A calendar wich is able to display multiple column per day",
   "main": "dist/calendar.js",
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/agence-webup/calendar.git"
   },
-  "author": "",
+  "author": "robinparisi",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/agence-webup/calendar/issues"
@@ -30,7 +30,5 @@
     "babelify": "^7.3.0",
     "browserify": "^14.1.0"
   },
-  "dependencies": {
-    "moment": "^2.17.1"
-  }
+  "dependencies": {}
 }

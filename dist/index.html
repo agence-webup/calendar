@@ -127,6 +127,9 @@
             prev: document.querySelector('#prev'),
             today: document.querySelector('#today'),
         },
+        isCellBlocked: function(timestamp) {
+            return Date.now() > timestamp;
+        },
         onEventClicked: function(event) {
             alert(event.id);
             console.log(event)

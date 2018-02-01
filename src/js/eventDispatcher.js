@@ -29,6 +29,7 @@ class EventDispatcher {
         cell.dataset.type = 'event';
         cell.dataset.eventId = event.id;
         cell.classList.add('calendar-event');
+        cell.classList.remove('calendar-locked');
 
         // calulcate rowspan
         let slotsToTake = Math.floor(event.duration / this.slotDuration);

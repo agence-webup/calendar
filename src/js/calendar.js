@@ -18,7 +18,6 @@ class Calendar {
     constructor(target, options) {
         this.target = document.querySelector(target);
         this.options = options;
-
         this.mode = {
             current: VIEW_MODE,
             ADD_MODE: {

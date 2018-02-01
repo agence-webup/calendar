@@ -144,8 +144,17 @@ class UIManager {
                     td.innerHTML = this.dateManager.getHoursLabel(index);
                     firstIteration = false;
                 } else {
-                    td.dataset.id = this.getCellId(index, j - 1);
+                    let column = j - 1;
+                    let collId = this.getCollId(column);
+                    let cellTimestamp = this.getCellTimestamp(index, column);
+
+                    td.dataset.id =  cellTimestamp + '#' + collId;
                     td.dataset.coordinate = this.getCellCoordinate(index, j - 1);
+
+                    if(this.options.isCellBlocked(cellTimestamp)) {
+                        td.classList.add('calendar-locked');
+                        td.dataset.type = 'locked';
+                    }
 
                     //td.innerHTML = this.getCellId(index, j - 1);
                     //td.innerHTML = this.dateManager.hours[index];
@@ -184,13 +193,7 @@ class UIManager {
     }
 
 
-    /**
-    * Get cell id (timestamp#col)
-    * @param  {[type]} index  [description]
-    * @param  {[type]} column [description]
-    * @return [type]          [description]
-    */
-    getCellId(index, column) {
+    getCellTimestamp(index, column) {
         let day = Math.ceil(column/ this.options.columnsPerDay);
 
         let date = this.dateManager.days[day - 1];
@@ -199,16 +202,15 @@ class UIManager {
         date.setSeconds(0);
         date.setMilliseconds(0);
 
-        let col = column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
-        return date.getTime() + '#' + col;
+        return date.getTime();
     }
 
-    /**
-    * Get cell coordinates (row#column)
-    * @param  {[type]} index  [description]
-    * @param  {[type]} column [description]
-    * @return [type]          [description]
-    */
+    getCollId(column) {
+        return column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
+    }
+
+
+
     getCellCoordinate(index, column) {
         return (index + 1) + '#' + column;
     }

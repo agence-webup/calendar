@@ -24,7 +24,6 @@ var Calendar = function () {
 
         this.target = document.querySelector(target);
         this.options = options;
-
         this.mode = {
             current: VIEW_MODE,
             ADD_MODE: {
@@ -703,6 +702,7 @@ var EventDispatcher = function () {
             cell.dataset.type = 'event';
             cell.dataset.eventId = event.id;
             cell.classList.add('calendar-event');
+            cell.classList.remove('calendar-locked');
 
             // calulcate rowspan
             var slotsToTake = Math.floor(event.duration / this.slotDuration);
@@ -983,8 +983,17 @@ var UIManager = function () {
                         td.innerHTML = _this2.dateManager.getHoursLabel(index);
                         firstIteration = false;
                     } else {
-                        td.dataset.id = _this2.getCellId(index, j - 1);
+                        var column = j - 1;
+                        var collId = _this2.getCollId(column);
+                        var cellTimestamp = _this2.getCellTimestamp(index, column);
+
+                        td.dataset.id = cellTimestamp + '#' + collId;
                         td.dataset.coordinate = _this2.getCellCoordinate(index, j - 1);
+
+                        if (_this2.options.isCellBlocked(cellTimestamp)) {
+                            td.classList.add('calendar-locked');
+                            td.dataset.type = 'locked';
+                        }
 
                         //td.innerHTML = this.getCellId(index, j - 1);
                         //td.innerHTML = this.dateManager.hours[index];
@@ -1021,17 +1030,9 @@ var UIManager = function () {
                 btn: footerBtn
             };
         }
-
-        /**
-        * Get cell id (timestamp#col)
-        * @param  {[type]} index  [description]
-        * @param  {[type]} column [description]
-        * @return [type]          [description]
-        */
-
     }, {
-        key: 'getCellId',
-        value: function getCellId(index, column) {
+        key: 'getCellTimestamp',
+        value: function getCellTimestamp(index, column) {
             var day = Math.ceil(column / this.options.columnsPerDay);
 
             var date = this.dateManager.days[day - 1];
@@ -1040,17 +1041,13 @@ var UIManager = function () {
             date.setSeconds(0);
             date.setMilliseconds(0);
 
-            var col = column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
-            return date.getTime() + '#' + col;
+            return date.getTime();
         }
-
-        /**
-        * Get cell coordinates (row#column)
-        * @param  {[type]} index  [description]
-        * @param  {[type]} column [description]
-        * @return [type]          [description]
-        */
-
+    }, {
+        key: 'getCollId',
+        value: function getCollId(column) {
+            return column % this.options.columnsPerDay == 0 ? this.options.columnsPerDay : column % this.options.columnsPerDay;
+        }
     }, {
         key: 'getCellCoordinate',
         value: function getCellCoordinate(index, column) {
