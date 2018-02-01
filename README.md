@@ -48,6 +48,10 @@ let calendar = new Calendar("#calendar", {
         prev: document.querySelector('#prev'),
         today: document.querySelector('#today'),
     },
+    isCellBlocked: function(timestamp) {
+        // block cells with condition
+        return Date.now() > timestamp;
+    },
     onEventClicked: function(eventId) {
         alert('Event clicked: ' + eventId);
     },
