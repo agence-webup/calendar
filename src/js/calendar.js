@@ -353,7 +353,7 @@ class Calendar {
                     case ADD_MODE:
                     let id = event.target.dataset.id.split('#');
                     if (!this.mode.ADD_MODE.dropAllowed) {
-                        alert('Cet emplacement est déjà pris');
+                        alert("Ce créneau n'est pas disponible");
                     } else {
                         // call back method with date and column
                         let date = new Date(parseInt(id[0]));
