@@ -1,6 +1,6 @@
 {
   "name": "thwomp.js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A calendar wich is able to display multiple column per day",
   "main": "dist/calendar.js",
   "scripts": {
