@@ -415,7 +415,8 @@ class Calendar {
                         let currentCell = document.querySelector('[data-coordinate="' +
                         currentRow + '#' + cellAdress[1] + '"]');
                         cells.push(currentCell);
-                        if (currentCell.dataset.type === 'locked' || currentCell.dataset.type ===
+                        const isOverSplitedCell = currentCell.dataset.type === 'splited' && i > 0
+                        if (currentCell.dataset.type === 'locked' || isOverSplitedCell || currentCell.dataset.type ===
                         'event') {
                             cssClass = 'calendar-selection--forbidden';
                             dropAllowed = false;

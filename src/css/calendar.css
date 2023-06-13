@@ -86,6 +86,10 @@
     cursor: pointer;
 }
 
+.calendar .calendar-splited {
+  border-top-width: 5px;
+}
+
 .calendar-locked {
   background-color: #b0bec5;
 }

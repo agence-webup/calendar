@@ -52,6 +52,9 @@ let calendar = new Calendar("#calendar", {
         // block cells with condition
         return Date.now() > timestamp;
     },
+    isCellSplited: function(timestamp) {
+        return splitedSlots.includes(timestamp);
+    },
     onEventClicked: function(eventId) {
         alert('Event clicked: ' + eventId);
     },

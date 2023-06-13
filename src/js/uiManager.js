@@ -154,6 +154,9 @@ class UIManager {
                     if(this.options.isCellBlocked(cellTimestamp)) {
                         td.classList.add('calendar-locked');
                         td.dataset.type = 'locked';
+                    } else if (this.options.isCellSplited instanceof Function && this.options.isCellSplited(cellTimestamp)) {
+                        td.classList.add('calendar-splited')
+                        td.dataset.type = 'splited';
                     }
 
                     //td.innerHTML = this.getCellId(index, j - 1);

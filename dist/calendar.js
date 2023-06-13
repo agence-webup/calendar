@@ -441,7 +441,8 @@ var Calendar = function () {
                             for (var i = 0; i < _this6.mode.ADD_MODE.slotsToTake; i++) {
                                 var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                                 cells.push(currentCell);
-                                if (currentCell.dataset.type === 'locked' || currentCell.dataset.type === 'event') {
+                                var isOverSplitedCell = currentCell.dataset.type === 'splited' && i > 0;
+                                if (currentCell.dataset.type === 'locked' || isOverSplitedCell || currentCell.dataset.type === 'event') {
                                     cssClass = 'calendar-selection--forbidden';
                                     dropAllowed = false;
                                 }
@@ -993,6 +994,9 @@ var UIManager = function () {
                         if (_this2.options.isCellBlocked(cellTimestamp)) {
                             td.classList.add('calendar-locked');
                             td.dataset.type = 'locked';
+                        } else if (_this2.options.isCellSplited instanceof Function && _this2.options.isCellSplited(cellTimestamp)) {
+                            td.classList.add('calendar-splited');
+                            td.dataset.type = 'splited';
                         }
 
                         //td.innerHTML = this.getCellId(index, j - 1);
