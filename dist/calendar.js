@@ -380,7 +380,7 @@ var Calendar = function () {
                         case ADD_MODE:
                             var id = event.target.dataset.id.split('#');
                             if (!_this6.mode.ADD_MODE.dropAllowed) {
-                                alert('Cet emplacement est déjà pris');
+                                alert("Ce créneau n'est pas disponible");
                             } else {
                                 // call back method with date and column
                                 var date = new Date(parseInt(id[0]));
