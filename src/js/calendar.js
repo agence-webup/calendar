@@ -416,8 +416,9 @@ class Calendar {
                         currentRow + '#' + cellAdress[1] + '"]');
                         cells.push(currentCell);
                         const isOverSplitedCell = currentCell.dataset.type === 'splited' && i > 0
-                        if (currentCell.dataset.type === 'locked' || isOverSplitedCell || currentCell.dataset.type ===
-                        'event') {
+                        const excludeCurrentEvent = (!this.mode.EDIT_MODE || !this.mode.EDIT_MODE.event || !this.mode.EDIT_MODE.event.id) || currentCell.dataset.eventId != this.mode.EDIT_MODE.event.id
+                        if (currentCell.dataset.type === 'locked' || isOverSplitedCell || (currentCell.dataset.type ===
+                        'event' && excludeCurrentEvent)) {
                             cssClass = 'calendar-selection--forbidden';
                             dropAllowed = false;
                         }

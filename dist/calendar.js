@@ -442,7 +442,8 @@ var Calendar = function () {
                                 var currentCell = document.querySelector('[data-coordinate="' + currentRow + '#' + cellAdress[1] + '"]');
                                 cells.push(currentCell);
                                 var isOverSplitedCell = currentCell.dataset.type === 'splited' && i > 0;
-                                if (currentCell.dataset.type === 'locked' || isOverSplitedCell || currentCell.dataset.type === 'event') {
+                                var excludeCurrentEvent = !_this6.mode.EDIT_MODE || !_this6.mode.EDIT_MODE.event || !_this6.mode.EDIT_MODE.event.id || currentCell.dataset.eventId != _this6.mode.EDIT_MODE.event.id;
+                                if (currentCell.dataset.type === 'locked' || isOverSplitedCell || currentCell.dataset.type === 'event' && excludeCurrentEvent) {
                                     cssClass = 'calendar-selection--forbidden';
                                     dropAllowed = false;
                                 }
