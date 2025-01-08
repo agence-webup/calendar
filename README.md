@@ -56,7 +56,8 @@ let calendar = new Calendar("#calendar", {
         return splitedSlots.includes(timestamp);
     },
     onEventClicked: function(eventId) {
-        alert('Event clicked: ' + eventId);
+        const eventIds = events.map(event => event.id); 
+        alert(`Clicked events IDs: ${eventIds.join(', ')}`);
     },
     onLocked: function(start, end, callback) {
         console.log(start + '->' + end);
@@ -80,7 +81,7 @@ let calendar = new Calendar("#calendar", {
 
 | méthode  | explication |
 |---|---|
-| onEventClicked  | Appelé lors du clic sur un évènement. Renvoi l'identifiant de l'évènement  |
+| onEventClicked  | Appelé lors du clic sur un évènement. Renvoi l'identifiant de l'évènement / des évènements si plusieurs d'entre eux ont été mergés automatiquement |
 | onLocked  | Appelé lors du blocage d'une plage horaire. Renvoi le début et la fin de la plage, ainsi qu'un callback devant être utilisé pour confirmer l'ajout de la plage après le traitement côté serveur |
 | onPeriodChange | Appelé lors d'un changement de période avec les boutons suivant, précédent et aujourd'hui. Renvoi le début et la fin de la nouvelle période. __Important:__ il est nécessaire de penser à recharger les évènements liés à cette nouvelle période en utilisant la méthode loadEvents  |
 
