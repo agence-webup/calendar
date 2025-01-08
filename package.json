@@ -5,7 +5,8 @@
   "main": "dist/calendar.js",
   "scripts": {
     "build": "gulp",
-    "dev": "gulp watch"
+    "dev": "gulp watch",
+    "doc": "gulp deploy"
   },
   "repository": {
     "type": "git",
