@@ -76,25 +76,32 @@
             title: 'Event 1',
             date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0, 0, 0),
             column: 2,
-            duration: 80
+            duration: 70
         },
         {
             id: 2,
             title: 'Event 2',
-            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0, 0, 0),
-            column: 1,
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 11, 0, 0, 0),
+            column: 2,
             duration: 40
         },
         {
             id: 3,
             title: 'Event 3',
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0, 0, 0),
+            column: 1,
+            duration: 40
+        },
+        {
+            id: 4,
+            title: 'Event 4',
             date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 12, 0, 0, 0),
             column: 1,
             duration: 69
         },
         {
-            id: 4,
-            title: 'Event 4',
+            id: 5,
+            title: 'Event 5',
             date: new Date(tomorow.getFullYear(), tomorow.getMonth(), tomorow.getDate(), 10, 0, 0, 0),
             column: 3,
             duration: 120
@@ -135,9 +142,10 @@
         isCellSplited: function(timestamp) {
             return splitedSlots.includes(timestamp);
         },
-        onEventClicked: function(event) {
-            alert(event.id);
-            console.log(event)
+        onEventClicked: (events) => {
+            const eventIds = events.map(event => event.id); 
+            alert(`Clicked events IDs: ${eventIds.join(', ')}`);
+            console.log(events);
         },
         onPeriodChange: function(start, end) {
             //console.log(start + ' ->', end);

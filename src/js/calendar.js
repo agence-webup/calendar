@@ -2,7 +2,6 @@
 
 const DateManager = require('./dateManager');
 const UIManager = require('./uiManager');
-const EventsManager = require('./eventsManager');
 const CellMatrix = require('./cellMatrix');
 const EventDispatcher = require('./eventDispatcher');
 const LockedEventDispatcher = require('./lockedEventDispatcher');
@@ -18,6 +17,7 @@ class Calendar {
     constructor(target, options) {
         this.target = document.querySelector(target);
         this.options = options;
+        this.mergedEvents = [];
         this.mode = {
             current: VIEW_MODE,
             ADD_MODE: {
@@ -67,17 +67,21 @@ class Calendar {
     loadEvents(events, blockedEvents) {
         this.events = events;
         this.blockedEvents = blockedEvents;
-
+    
         // event dispatcher
         this.eventDispatcher = new EventDispatcher(this.options.slotDuration);
         this.eventDispatcher.loadEvents(this.events);
-
+    
+        // assign merged events to the calendar instance
+        this.mergedEvents = this.eventDispatcher.mergedEvents;
+    
         // lockedEvent dispatcher
         this.lockedEventDispatcher = new LockedEventDispatcher(this.options.slotDuration);
         this.lockedEventDispatcher.loadEvents(this.blockedEvents);
-
+    
         this._bindEvents();
     }
+    
 
     addEvent(event) {
         let cell = this.eventDispatcher.addEvent(event);
@@ -248,10 +252,11 @@ class Calendar {
     _attachClickEvent(el) {
         el.addEventListener('click', (event) => {
             event.stopPropagation();
-            if (this.mode.current == VIEW_MODE) {
-                this.events.forEach((e) => {
-                    if(e.id == event.target.dataset.eventId) {
-                        this.options.onEventClicked(e);
+            if (this.mode.current === VIEW_MODE) {
+                this.mergedEvents.forEach((e) => {
+                    if (e.id == event.target.dataset.eventId) {
+                        const baseEvents = e.mergedEvents || [e]; // Retrieve original events
+                        this.options.onEventClicked(baseEvents); // Pass the array of merged events
                     }
                 });
             }
